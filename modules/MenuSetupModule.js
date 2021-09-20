@@ -105,12 +105,13 @@ const MonthDateSave = (data) => {
         var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
         data.month_day.forEach(async d => {
             if (d.dt > 0) {
-                var chk_dt = await Check_Data(db_name = 'td_date_time', whr = `WHERE restaurant_id = "${data.restaurant_id}" AND month_day = "${d.dt}"`);
+                var chk_dt = await Check_Data(db_name = 'td_date_time', whr = `WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}" AND month_day = "${d.dt}"`);
                 if (chk_dt > 1) {
                     sql = `INSERT INTO td_date_time (restaurant_id, menu_id, active_flag, month_day, start_time, end_time, created_by, created_dt) VALUES 
                     ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${d.dt}", "${data.start_time}", "${data.end_time}", "${data.restaurant_id}", "${datetime}")`;
                 } else {
-                    sql = `UPDATE td_date_time SET start_time = "${data.start_time}", end_time = "${data.end_time}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}" WHERE restaurant_id = "${data.restaurant_id}" AND month_day = "${d.dt}"`;
+                    sql = `UPDATE td_date_time SET start_time = "${data.start_time}", end_time = "${data.end_time}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}" 
+                    WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}" AND month_day = "${d.dt}"`;
                 }
                 db.query(sql, (err, lastId) => {
                     if (err) {
