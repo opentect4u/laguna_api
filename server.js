@@ -19,6 +19,7 @@ const { RegRouter } = require('./route/RegistrationRoute');
 const { AdmRouter } = require('./route/AdminRouter');
 const { LogRouter } = require('./route/LoginRouter');
 const { MenuSetRouter } = require('./route/MenuSetupRouter');
+const { TestRouter } = require('./route/TestRoute');
 ///////////////////////////////////////////
 
 // REGISTRATION ROUTER RegistrationRouter.js FOLDER //
@@ -32,6 +33,8 @@ app.use(LogRouter);
 
 // MENU SETUP ROUTER LoginRouter.js FOLDER //
 app.use(MenuSetRouter);
+
+app.use(TestRouter);
 
 // CREATE EXPRESS SERVER //
 app.listen(port, (err) => {
