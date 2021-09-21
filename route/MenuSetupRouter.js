@@ -154,7 +154,11 @@ MenuSetRouter.post('/notice', async (req, res) => {
 
 MenuSetRouter.get('/menu_setup', async (req, res) => {
     let id = req.query.id;
-    let sql = `SELECT a.logo_url, b.menu_id, b.cover_page_url, b.top_img_url FROM td_logo a, td_other_image b WHERE a.restaurant_id = b.restaurant_id AND a.restaurant_id = "${id}"`;
+    let sql = `SELECT b.logo_url, a.menu_id, a.cover_page_url, a.top_img_url, a.active_flag, c.menu_url
+        FROM td_other_image a
+        left JOIN td_logo b ON a.restaurant_id = b.restaurant_id
+        left JOIN td_menu_image c ON a.restaurant_id = c.restaurant_id
+        WHERE a.restaurant_id = "${id}"`;
     var data = await F_Select(sql);
     res.send(data);
 })
@@ -197,14 +201,15 @@ MenuSetRouter.post('/section', async (req, res) => {
 MenuSetRouter.get('/section', async (req, res) => {
     let res_id = req.query.id;
     let menu_id = req.query.menu_id;
-    let sql = `SELECT * FROM md_section WHERE restaurant_id = "${res_id}" AND menu_id = "${menu_id}"`;
+    let whr = menu_id > 0 ? `AND menu_id = "${menu_id}"` : ''
+    let sql = `SELECT * FROM md_section WHERE restaurant_id = "${res_id}" ${whr}`;
     var data = await F_Select(sql);
     res.send(data);
 })
 
-MenuSetRouter.post('/items', (req, res) => {
+MenuSetRouter.post('/items', async (req, res) => {
     console.log(req.body);
-    var data = ItemSave(req.body);
+    var data = await ItemSave(req.body);
     res.send(data);
 })
 
@@ -212,7 +217,8 @@ MenuSetRouter.get('/items', async (req, res) => {
     let res_id = req.query.id;
     let menu_id = req.query.menu_id;
     let sec_id = req.query.sec_id;
-    let sql = `SELECT * FROM md_items WHERE restaurant_id = "${res_id}" AND menu_id = "${menu_id}" AND section_id = "${sec_id}"`;
+    let whr = menu_id > 0 && sec_id > 0 ? `AND menu_id = "${menu_id}" AND section_id = "${sec_id}"` : ''
+    let sql = `SELECT * FROM md_items WHERE restaurant_id = "${res_id}" ${whr}`;
     var data = await F_Select(sql);
     res.send(data);
 })
@@ -223,9 +229,26 @@ MenuSetRouter.post('/item_price', async (req, res) => {
     res.send(data);
 })
 
+MenuSetRouter.get('/item_price', async (req, res) => {
+    var res_id = req.query.id;
+    let sql = `SELECT * FROM md_item_description WHERE restaurant_id = "${res_id}"`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
 MenuSetRouter.get('/notice', async (req, res) => {
     var res_id = req.query.id;
     let sql = `SELECT * FROM td_menu_notice WHERE restaurant_id = "${res_id}"`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
+MenuSetRouter.get('/res_details', async (req, res) => {
+    var res_id = req.query.id;
+    let whr = res_id > 0 ? `WHERE a.id = "${res_id}"` : '';
+    let sql = `SELECT a.*, c.setup_fee, c.monthly_fee FROM td_contacts a
+                LEFT JOIN td_order_items b ON a.id=b.restaurant_id
+                LEFT JOIN md_package c ON b.package_id=c.pakage_name ${whr}`;
     var data = await F_Select(sql);
     res.send(data);
 })
