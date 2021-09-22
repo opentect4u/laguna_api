@@ -1,5 +1,5 @@
 const express = require('express');
-const { BreakfastSave, MenuSave, LogoSave, AboutUsSave, NoticeSave, F_Select, MonthDateSave, SectionSave, ItemSave, ItemPriceSave } = require('../modules/MenuSetupModule');
+const { BreakfastSave, MenuSave, LogoSave, AboutUsSave, NoticeSave, F_Select, MonthDateSave, SectionSave, ItemSave, ItemPriceSave, GenerateQr } = require('../modules/MenuSetupModule');
 const MenuSetRouter = express.Router();
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -250,6 +250,19 @@ MenuSetRouter.get('/res_details', async (req, res) => {
                 LEFT JOIN td_order_items b ON a.id=b.restaurant_id
                 LEFT JOIN md_package c ON b.package_id=c.pakage_name ${whr}`;
     var data = await F_Select(sql);
+    res.send(data);
+})
+
+MenuSetRouter.get('/get_url', async (req, res) => {
+    var res_id = req.query.id;
+    let sql = `SELECT * FROM md_url WHERE restaurant_id = "${res_id}"`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
+MenuSetRouter.post('/generate_qr', async (req, res) => {
+    console.log(req.body);
+    var data = await GenerateQr(req.body);
     res.send(data);
 })
 

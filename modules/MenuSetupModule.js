@@ -2,6 +2,10 @@ const db = require('../core/db');
 const dateFormat = require('dateformat');
 var multer = require('multer');
 
+const QRCode = require("qrcode");
+const { createCanvas, loadImage } = require("canvas");
+const fs = require('fs');
+
 var storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, '../assets/files');
@@ -230,7 +234,7 @@ const SectionSave = (data) => {
     var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
     var sql = '';
     if (data.id) {
-        sql = `UPDATE md_section menu_id = "${data.menu_id}", section_name = "${data.sec_name}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
+        sql = `UPDATE md_section SET menu_id = "${data.menu_id}", section_name = "${data.sec_name}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
         WHERE id = "${data.id}"`;
     } else {
         sql = `INSERT INTO md_section (restaurant_id, menu_id, section_name, created_by, created_dt) VALUES 
@@ -297,4 +301,66 @@ const ItemPriceSave = (data) => {
     })
 }
 
-module.exports = { BreakfastSave, MenuSave, LogoSave, AboutUsSave, NoticeSave, F_Select, MonthDateSave, SectionSave, ItemSave, ItemPriceSave };
+const create = async (dataForQRcode, center_image, width, cwidth) => {
+    const canvas = createCanvas(width, width);
+    QRCode.toCanvas(
+        canvas,
+        dataForQRcode,
+        {
+            errorCorrectionLevel: "H",
+            margin: 1,
+            color: {
+                dark: "#2196F3",
+                light: "#ffffff",
+            },
+        }
+    );
+
+    const ctx = canvas.getContext("2d");
+    const img = await loadImage(center_image);
+    const center = (width - cwidth) / 2;
+    let path = 'assets/qr.png';
+    let img_name = 'qr.png';
+    ctx.drawImage(img, center, center, cwidth, cwidth);
+    const buffer = canvas.toBuffer("image/png");
+    fs.writeFileSync(path, buffer)
+    return new Promise((resolve, reject) => {
+        resolve({ path, img_name });
+    })
+    // return canvas.toDataURL("image/png");
+}
+
+const GenerateQr = async (data) => {
+    const qrCode = await create(
+        data.url,
+        data.img,
+        145,
+        45
+    );
+    var sql = '';
+    let ckh_sql = `SELECT * FROM md_url WHERE restaurant_id = "${data.res_id}"`;
+    db.query(ckh_sql, (err, result) => {
+        if (err) {
+            console.log(err);
+        } else {
+            if (result.length > 0) {
+                sql = `UPDATE md_url url = "${data.url}", image = "${qrCode.img_name}" WHERE restaurant_id = "${data.res_id}"`;
+            } else {
+                sql = `INSERT INTO md_url (restaurant_id, url, image) VALUES ("${data.res_id}", "${data.url}", "${qrCode.img_name}")`;
+            }
+        }
+    })
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err, lastId) => {
+            if (err) {
+                console.log(err);
+                data = { suc: 0, msg: JSON.stringify(err) };
+            } else {
+                data = { suc: 1, msg: 'Inserted Successfully !!' };
+            }
+            resolve(data)
+        })
+    })
+}
+
+module.exports = { BreakfastSave, MenuSave, LogoSave, AboutUsSave, NoticeSave, F_Select, MonthDateSave, SectionSave, ItemSave, ItemPriceSave, GenerateQr };
