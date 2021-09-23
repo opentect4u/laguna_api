@@ -102,9 +102,10 @@ const SectionImageSave = (data) => {
     })
 }
 
-const MonthDateSave = (data) => {
+const MonthDateSave = async (data) => {
 
     var sql = '';
+    await DeleteDatetime(data);
     return new Promise((resolve, reject) => {
         var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
         data.month_day.forEach(async d => {
@@ -129,6 +130,29 @@ const MonthDateSave = (data) => {
         })
         resolve(data);
     })
+}
+
+const DeleteDatetime = (data) => {
+    var dt = {
+        coverurl: 'asdsadasd',
+        topurl: '123.com',
+        MenuUrl: 'asdsad',
+        SectionUrl: 'asdsa',
+        restaurant_id: '55',
+        menu_id: '3',
+        break_check: 'Y',
+        start_time: '22:11',
+        end_time: '22:11',
+        month_day: [
+            { dt: 2 },
+            { dt: 3 },
+            { dt: 4 },
+            { dt: 5 },
+            { dt: 6 },
+            { dt: 7 },
+            { dt: 8 }
+        ]
+    }
 }
 
 const LogoSave = (data) => {

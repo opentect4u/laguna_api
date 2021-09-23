@@ -266,4 +266,30 @@ MenuSetRouter.post('/generate_qr', async (req, res) => {
     res.send(data);
 })
 
+MenuSetRouter.get('/tes', (req, res) => {
+    var b = new Array();
+    var dt = {
+        coverurl: 'asdsadasd',
+        topurl: '123.com',
+        MenuUrl: 'asdsad',
+        SectionUrl: 'asdsa',
+        restaurant_id: '55',
+        menu_id: '3',
+        break_check: 'Y',
+        start_time: '22:11',
+        end_time: '22:11',
+        month_day: [
+            { dt: 2 },
+            { dt: 3 },
+            { dt: 0 },
+            { dt: 5 },
+            { dt: 0 },
+            { dt: 7 },
+            { dt: 8 }
+        ]
+    }
+    console.log(x);
+    // console.log(dt.month_day.join(','));
+})
+
 module.exports = { MenuSetRouter };
