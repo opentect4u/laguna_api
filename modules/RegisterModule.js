@@ -103,7 +103,7 @@ const PaySave = async (data) => {
     var de_id = str.split('/');
     var pwd = bcrypt.hashSync('123', 10);
     var dt = '';
-
+    await SaveUrl(de_id[0], data);
     return new Promise(async (resolve, reject) => {
         if (await UpdateOrder(data)) {
             var sql = `INSERT INTO td_users (restaurant_id, email_id, pwd, active_flag) VALUES ("${de_id[0]}", "${de_id[1]}", "${pwd}", "Y")`;
@@ -141,6 +141,33 @@ const GetResturentDetails = (id) => {
                 data = result;
             }
             resolve(data);
+        })
+    })
+}
+
+const SaveUrl = (id, data) => {
+    var sql = '';
+    let ckh_sql = `SELECT * FROM md_url WHERE restaurant_id = "${id}"`;
+    db.query(ckh_sql, (err, result) => {
+        if (err) {
+            console.log(err);
+        } else {
+            if (result.length > 0) {
+                sql = `UPDATE md_url url = "${data.url}" WHERE restaurant_id = "${id}"`;
+            } else {
+                sql = `INSERT INTO md_url (restaurant_id, url) VALUES ("${id}", "${data.url}")`;
+            }
+        }
+    })
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err, lastId) => {
+            if (err) {
+                console.log(err);
+                data = { suc: 0, msg: JSON.stringify(err) };
+            } else {
+                data = { suc: 1, msg: 'Inserted Successfully !!' };
+            }
+            resolve(data)
         })
     })
 }

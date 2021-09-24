@@ -7,11 +7,17 @@ MenuRouter.get('/preview_menu', async (req, res) => {
         str_time = req.query.st_time,
         end_time = req.query.end_time;
     var data = await PreviewMenu(res_id, str_time, end_time);
-    res.send(data);
+    console.log(data);
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(data));
+    // res.send(data);
 })
 
 MenuRouter.get('/test', async (req, res) => {
-    await Test();
+    var filename = 'app.png';
+    let file_ext = filename.split('.')[1]
+    res.send(file_ext);
+    // await Test();
 })
 
 module.exports = { MenuRouter }

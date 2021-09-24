@@ -387,4 +387,5 @@ const GenerateQr = async (data) => {
     })
 }
 
-module.exports = { BreakfastSave, MenuSave, LogoSave, AboutUsSave, NoticeSave, F_Select, MonthDateSave, SectionSave, ItemSave, ItemPriceSave, GenerateQr };
+module.exports = {
+    BreakfastSave, MenuSave, LogoSave, AboutUsSave, NoticeSave, F_Select, MonthDateSave, SectionSave, ItemSave, ItemPriceSave, GenerateQr, MenuImageSave, OtherImageSave, SectionImageSave };
