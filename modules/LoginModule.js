@@ -33,7 +33,7 @@ const Login = async (data) => {
 
 const UpdateLoginTime = (email_id) => {
     var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
-    var sql = `UPDATE td_users SET last_login_dt = "${datetime}" WHERE email = ${email_id}`;
+    var sql = `UPDATE td_users SET last_login_dt = "${datetime}" WHERE email_id = "${email_id}"`;
     return new Promise((resolve, reject) => {
         db.query(sql, (err, lastId) => {
             if (err) {

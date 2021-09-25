@@ -45,6 +45,25 @@ const EmailCheck = (data) => {
     })
 }
 
+const MobileCheck = (mob_no) => {
+    var sql = `SELECT * FROM td_contacts WHERE phone_no = "${mob_no}"`;
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err, result) => {
+            if (err) {
+                console.log(err);
+                data = { suc: 0, msg: JSON.stringify(err) };
+            } else {
+                if (result.length > 0) {
+                    data = { suc: 2, msg: 'Number Already Exist' };
+                } else {
+                    data = { suc: 1, msg: 'Fresh Number' }
+                }
+            }
+            resolve(data);
+        })
+    })
+}
+
 const OrderSave = (data) => {
     // var table_top = [{
     //     id: '6',
@@ -157,19 +176,19 @@ const SaveUrl = (id, data) => {
             } else {
                 sql = `INSERT INTO md_url (restaurant_id, url) VALUES ("${id}", "${data.url}")`;
             }
+            return new Promise((resolve, reject) => {
+                db.query(sql, (err, lastId) => {
+                    if (err) {
+                        console.log(err);
+                        data = { suc: 0, msg: JSON.stringify(err) };
+                    } else {
+                        data = { suc: 1, msg: 'Inserted Successfully !!' };
+                    }
+                    resolve(data)
+                })
+            })
         }
-    })
-    return new Promise((resolve, reject) => {
-        db.query(sql, (err, lastId) => {
-            if (err) {
-                console.log(err);
-                data = { suc: 0, msg: JSON.stringify(err) };
-            } else {
-                data = { suc: 1, msg: 'Inserted Successfully !!' };
-            }
-            resolve(data)
-        })
     })
 }
 
-module.exports = { ResRegistration, EmailCheck, OrderSave, PaySave };
+module.exports = { ResRegistration, EmailCheck, OrderSave, PaySave, MobileCheck };

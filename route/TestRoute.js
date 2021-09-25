@@ -1,7 +1,7 @@
 const express = require('express')
 const upload = require('express-fileupload')
 const fs = require('fs');
-const { MenuImageSave } = require('../modules/MenuSetupModule');
+const { MenuImageSave, SectionImageSave, OtherImageSave, MonthDateSave } = require('../modules/MenuSetupModule');
 const TestRouter = express.Router();
 // const db = require('./db')
 
@@ -20,7 +20,15 @@ TestRouter.post('/testing', async (req, res) => {
     // await uploadFile(req.files.files, req.body.ac_id);
     let res_name = req.body.restaurant_name.replace(' ', '_');
     let menu_name = req.body.menu_id == 1 ? 'breakfast' : (req.body.menu_id == 2 ? 'lunch' : (req.body.menu_id == 3 ? 'dinner' : (req.body.menu_id == 4 ? 'brunch' : 'special')));
-    await UploadCover(req.files.cov_img, req.files.top_img, menu_name, res_name, req.body)
+    var upload_cover_top = await UploadCover(req.files.cov_img, req.files.top_img, menu_name, res_name, req.body),
+        upload_sec = await UploadSection(req.files.section_img, menu_name, res_name, req.body),
+        upload_menu = await UploadMenu(req.files.menu_img, menu_name, res_name, req.body),
+        month_day_save = await MonthDateSave(req.body);
+    if (upload_cover_top && upload_sec && upload_menu && month_day_save) {
+        res.send({ suc: 1, msg: 'Success' });
+    } else {
+        res.send({ suc: 0, msg: 'Not Inserted' });
+    }
     console.log({ fi: req.files, dt: req.body, re: req });
 })
 
@@ -65,14 +73,26 @@ const UploadCover = async (cov_img, top_img, menu_name, res_name, data) => {
             }
         })
 
-        await MenuImageSave()
+        return new Promise(async (resolve, reject) => {
+            if (await MenuImageSave(data, cov_file_path, top_file_path)) {
+                res = true;
+            } else {
+                res = false
+            }
+            resolve(res);
+        })
+
     }
 }
 
-const uploadFile = (files, name) => {
-    if (files) {
-        var ResIdPath = "public/uploads/" + name;
-        var UploadsPath = "public/uploads/" + name + "/breakfast/";
+const UploadSection = async (sec_img, menu_name, res_name, data) => {
+    if (sec_img) {
+        var sec_file = sec_img,
+            // filename = sec_file.name,
+            // file_ext = filename.split('.')[1],
+            ResIdPath = "public/uploads/" + res_name,
+            UploadsPath = ResIdPath + "/" + menu_name + "/section/";
+        // file_path = "uploads/" + res_name + "/" + menu_name + "/section/" + file_name;
 
         if (!fs.existsSync(ResIdPath)) {
             fs.mkdirSync(ResIdPath);
@@ -82,19 +102,112 @@ const uploadFile = (files, name) => {
                 fs.mkdirSync(UploadsPath);
             }
         }
-        files.forEach(dt => {
+        sec_file.forEach(dt => {
             var file = dt;
-            var filename = file.name
+            var filename = file.name,
+                // file_name = filename.split('.')[0] + '_' + new Date() + '.' + filename.split('.')[1],
+                file_path = "uploads/" + res_name + "/" + menu_name + "/section/" + filename;
             // console.log(filename);
 
-            file.mv(UploadsPath + filename, (err) => {
+            file.mv(UploadsPath + filename, async (err) => {
                 if (err) {
-                    // res.send(err)
+                    console.log(`${filename} not uploaded`);
                 } else {
+                    console.log(`Successfully ${filename} uploaded`);
+                    await SectionImageSave(data, file_path);
                 }
             })
+            return new Promise((resolve, reject) => {
+                resolve(true);
+            });
         })
     }
 }
+
+const UploadMenu = async (menu_img, menu_name, res_name, data) => {
+    if (menu_img) {
+        var sec_file = menu_img,
+            // filename = sec_file.name,
+            // file_ext = filename.split('.')[1],
+            ResIdPath = "public/uploads/" + res_name,
+            UploadsPath = ResIdPath + "/" + menu_name + "/menu/";
+        // file_path = "uploads/" + res_name + "/" + menu_name + "/section/" + file_name;
+
+        if (!fs.existsSync(ResIdPath)) {
+            fs.mkdirSync(ResIdPath);
+            fs.mkdirSync(UploadsPath);
+        } else {
+            if (!fs.existsSync(UploadsPath)) {
+                fs.mkdirSync(UploadsPath);
+            }
+        }
+        sec_file.forEach(dt => {
+            var file = dt;
+            var filename = file.name,
+                // file_name = filename.split('.')[0] + '_' + new Date() + '.' + filename.split('.')[1],
+                file_path = "uploads/" + res_name + "/" + menu_name + "/menu/" + filename;
+            // console.log(filename);
+
+            file.mv(UploadsPath + filename, async (err) => {
+                if (err) {
+                    console.log(`${filename} not uploaded`);
+                } else {
+                    console.log(`Successfully ${filename} uploaded`);
+                    await OtherImageSave(data, file_path);
+                }
+            })
+            return new Promise((resolve, reject) => {
+                resolve(true);
+            });
+        })
+    }
+}
+
+TestRouter.post('/t', (req, res) => {
+    console.log(req.body);
+    var dt = req.body;
+    // var dt = {
+    //     coverurl: 'asdsadasd',
+    //     topurl: '123.com',
+    //     MenuUrl: 'asdsad',
+    //     SectionUrl: 'asdsa',
+    //     restaurant_id: '55',
+    //     menu_id: '3',
+    //     break_check: 'Y',
+    //     start_time: '22:11',
+    //     end_time: '22:11',
+    //     month_day: [
+    //         { dt: 2 },
+    //         { dt: 3 },
+    //         { dt: 0 },
+    //         { dt: 5 },
+    //         { dt: 0 },
+    //         { dt: 7 },
+    //         { dt: 8 }
+    //     ]
+    // };
+    var v = '',
+        v1 = '';
+    for (let i = 0; i < dt.month_day.length; i++) {
+        if (dt.month_day[i].dt > 0) {
+            v = dt.month_day[i].dt;
+            if (v1 != '') {
+                v1 = v + ',' + v1;
+            } else {
+                v1 = v;
+            }
+        }
+    }
+    var sql = `DELETE FROM td_date_time WHERE restaurant_id = "${dt.restaurant_id}" AND menu_id = "${dt.menu_id}" AND month_day NOT IN(${v1})`;
+    // db.query(sql, (err, lastId) => {
+    //     if (err) {
+    //         console.log(err);
+    //     } else {
+    //         console.log("Deleted Date-Time");
+    //     }
+    // })
+    console.log(sql);
+    res.send(v1)
+})
 
 module.exports = { TestRouter };

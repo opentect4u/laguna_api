@@ -15,7 +15,7 @@ LogRouter.get('/check_menu_setup', async (req, res) => {
             (SELECT e.no_of_menu FROM td_order_items d JOIN md_package e ON d.package_id=e.pakage_name WHERE a.restaurant_id=d.restaurant_id GROUP BY a.restaurant_id) as menu_name
             FROM td_users a, td_contacts b
             WHERE a.restaurant_id=b.id AND a.restaurant_id = "${res_id}"`;
-    var data = F_Select(sql);
+    var data = await F_Select(sql);
     res.send(data);
 })
 

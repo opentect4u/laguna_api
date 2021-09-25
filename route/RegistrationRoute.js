@@ -1,6 +1,6 @@
 const express = require('express');
 const { F_Select } = require('../modules/MenuSetupModule');
-const { ResRegistration, EmailCheck, OrderSave, PaySave } = require('../modules/RegisterModule');
+const { ResRegistration, EmailCheck, OrderSave, PaySave, MobileCheck } = require('../modules/RegisterModule');
 const RegRouter = express.Router();
 
 RegRouter.post('/registration', async (req, res) => {
@@ -11,6 +11,11 @@ RegRouter.post('/registration', async (req, res) => {
 RegRouter.get('/email_check', async (req, res) => {
     // console.log(req.query);
     const data = await EmailCheck(req.query);
+    res.send(data);
+})
+
+RegRouter.get('/mobile_check', async (req, res) => {
+    const data = await MobileCheck(req.query.no);
     res.send(data);
 })
 

@@ -1,5 +1,5 @@
 const express = require('express');
-const { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave } = require('../modules/AdminModule');
+const { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval } = require('../modules/AdminModule');
 const AdmRouter = express.Router();
 
 AdmRouter.post('/package', async (req, res) => {
@@ -29,6 +29,11 @@ AdmRouter.post('/holder_cling', async (req, res) => {
 
 AdmRouter.get('/holder_cling', async (req, res) => {
     var data = await GetResult(tb_name = 'md_holder_cling');
+    res.send(data);
+})
+
+AdmRouter.get('/update_approval', async (req, res) => {
+    var data = await UpdateApproval(req.query.flag, req.query.res_id);
     res.send(data);
 })
 

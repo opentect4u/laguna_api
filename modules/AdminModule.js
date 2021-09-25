@@ -132,4 +132,19 @@ const CheckData = (data, tb_name) => {
     })
 }
 
-module.exports = { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave };
+const UpdateApproval = (flag, res_id) => {
+    var sql = `UPDATE md_url SET approval_flag = '${flag}' WHERE restaurant_id = "${res_id}"`;
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err, lastId) => {
+            if (err) {
+                console.log(err);
+                data = { suc: 0, msg: JSON.stringify(err) }
+            } else {
+                data = { suc: 1, msg: 'Successfully Updated !!' };
+            }
+            resolve(data);
+        })
+    })
+}
+
+module.exports = { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval };
