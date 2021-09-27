@@ -98,9 +98,9 @@ const HolderClingSave = async (data) => {
     var check = await CheckData(data, tb_name = 'md_holder_cling');
     var sql = '';
     if (check > 1) {
-        sql = `INSERT INTO md_holder_cling (id, price, created_by, created_dt) VALUES ("${data.serial_no}", "${data.per_Holder_Price}", "Subham", "2021-09-15")`;
+        sql = `INSERT INTO md_holder_cling (id, free_flag, price, created_by, created_dt) VALUES ("${data.serial_no}", "${data.free_flag}", "${data.per_Holder_Price}", "Subham", "2021-09-15")`;
     } else {
-        sql = `UPDATE md_holder_cling SET price= "${data.per_Holder_Price}", modified_by= "Subham", modified_dt= "2021-09-15" WHERE id = ${data.serial_no}`;
+        sql = `UPDATE md_holder_cling SET free_flag= "${data.free_flag}", price= "${data.per_Holder_Price}", modified_by= "Subham", modified_dt= "2021-09-15" WHERE id = ${data.serial_no}`;
     }
     return new Promise((resolve, reject) => {
         db.query(sql, (err, lastId) => {
@@ -147,4 +147,4 @@ const UpdateApproval = (flag, res_id) => {
     })
 }
 
-module.exports = { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval };
+module.exports = { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, CheckData };

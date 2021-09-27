@@ -1,4 +1,5 @@
 const express = require('express');
+const { CheckData } = require('../modules/AdminModule');
 const { Login } = require('../modules/LoginModule');
 const { F_Select } = require('../modules/MenuSetupModule');
 const LogRouter = express.Router();
@@ -6,6 +7,19 @@ const LogRouter = express.Router();
 LogRouter.post('/login', async (req, res) => {
     var data = await Login(req.body);
     res.send(data);
+})
+
+LogRouter.get('/forgot_password', async (req, res) => {
+    var data = '';
+    var sql = `SELECT * FROM td_users WHERE email_id = "${req.query.Email}"`;
+    var dt = await F_Select(sql);
+    if (dt.msg.length > 0) {
+        data = { suc: 1, msg: "Email Already Exist" };
+    } else {
+        data = { suc: 2, msg: "Fresh Email" };
+    }
+    res.send(data);
+    // console.log(dt.msg.length);
 })
 
 LogRouter.get('/check_menu_setup', async (req, res) => {

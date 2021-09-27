@@ -1,7 +1,7 @@
 const express = require('express')
 const upload = require('express-fileupload')
 const fs = require('fs');
-const { MenuImageSave, SectionImageSave, OtherImageSave, MonthDateSave } = require('../modules/MenuSetupModule');
+const { MenuImageSave, SectionImageSave, OtherImageSave, MonthDateSave, LogoSave } = require('../modules/MenuSetupModule');
 const TestRouter = express.Router();
 // const db = require('./db')
 
@@ -17,19 +17,19 @@ if (!fs.existsSync(dir)) {
 }
 
 TestRouter.post('/testing', async (req, res) => {
-    // await uploadFile(req.files.files, req.body.ac_id);
+    console.log({ bd: req.body });
+
     let res_name = req.body.restaurant_name.replace(' ', '_');
     let menu_name = req.body.menu_id == 1 ? 'breakfast' : (req.body.menu_id == 2 ? 'lunch' : (req.body.menu_id == 3 ? 'dinner' : (req.body.menu_id == 4 ? 'brunch' : 'special')));
     var upload_cover_top = await UploadCover(req.files.cov_img, req.files.top_img, menu_name, res_name, req.body),
         upload_sec = await UploadSection(req.files.section_img, menu_name, res_name, req.body),
-        upload_menu = await UploadMenu(req.files.menu_img, menu_name, res_name, req.body),
-        month_day_save = await MonthDateSave(req.body);
-    if (upload_cover_top && upload_sec && upload_menu && month_day_save) {
+        upload_menu = await UploadMenu(req.files.menu_img, menu_name, res_name, req.body);
+    // month_day_save = await MonthDateSave(req.body);
+    if (upload_cover_top && upload_sec && upload_menu) {
         res.send({ suc: 1, msg: 'Success' });
     } else {
         res.send({ suc: 0, msg: 'Not Inserted' });
     }
-    console.log({ fi: req.files, dt: req.body, re: req });
 })
 
 const UploadCover = async (cov_img, top_img, menu_name, res_name, data) => {
@@ -87,11 +87,12 @@ const UploadCover = async (cov_img, top_img, menu_name, res_name, data) => {
 
 const UploadSection = async (sec_img, menu_name, res_name, data) => {
     if (sec_img) {
+        // console.log();
         var sec_file = sec_img,
             // filename = sec_file.name,
             // file_ext = filename.split('.')[1],
             ResIdPath = "public/uploads/" + res_name,
-            UploadsPath = ResIdPath + "/" + menu_name + "/section/";
+            UploadsPath = ResIdPath + "/" + menu_name + "/";
         // file_path = "uploads/" + res_name + "/" + menu_name + "/section/" + file_name;
 
         if (!fs.existsSync(ResIdPath)) {
@@ -102,25 +103,46 @@ const UploadSection = async (sec_img, menu_name, res_name, data) => {
                 fs.mkdirSync(UploadsPath);
             }
         }
-        sec_file.forEach(dt => {
-            var file = dt;
-            var filename = file.name,
+        if (Array.isArray(sec_img)) {
+            sec_file.forEach(dt => {
+                var file = dt;
+                var filename = file.name,
+                    // file_name = filename.split('.')[0] + '_' + new Date() + '.' + filename.split('.')[1],
+                    file_path = "uploads/" + res_name + "/" + menu_name + "/" + filename;
+                // console.log(filename);
+
+                file.mv(UploadsPath + filename, async (err) => {
+                    if (err) {
+                        console.log(`${filename} not uploaded`);
+                    } else {
+                        console.log(`Successfully ${filename} uploaded`);
+                        await SectionImageSave(data, file_path);
+                    }
+                })
+                return new Promise((resolve, reject) => {
+                    resolve(true);
+                });
+            })
+        } else {
+            var filename = sec_file.name,
                 // file_name = filename.split('.')[0] + '_' + new Date() + '.' + filename.split('.')[1],
-                file_path = "uploads/" + res_name + "/" + menu_name + "/section/" + filename;
+                file_path = "uploads/" + res_name + "/" + menu_name + "/" + filename;
             // console.log(filename);
 
-            file.mv(UploadsPath + filename, async (err) => {
+            sec_file.mv(UploadsPath + filename, async (err) => {
                 if (err) {
                     console.log(`${filename} not uploaded`);
                 } else {
                     console.log(`Successfully ${filename} uploaded`);
+                    console.log(data);
                     await SectionImageSave(data, file_path);
                 }
             })
             return new Promise((resolve, reject) => {
                 resolve(true);
             });
-        })
+        }
+
     }
 }
 
@@ -130,7 +152,7 @@ const UploadMenu = async (menu_img, menu_name, res_name, data) => {
             // filename = sec_file.name,
             // file_ext = filename.split('.')[1],
             ResIdPath = "public/uploads/" + res_name,
-            UploadsPath = ResIdPath + "/" + menu_name + "/menu/";
+            UploadsPath = ResIdPath + "/" + menu_name + "/";
         // file_path = "uploads/" + res_name + "/" + menu_name + "/section/" + file_name;
 
         if (!fs.existsSync(ResIdPath)) {
@@ -141,14 +163,33 @@ const UploadMenu = async (menu_img, menu_name, res_name, data) => {
                 fs.mkdirSync(UploadsPath);
             }
         }
-        sec_file.forEach(dt => {
-            var file = dt;
-            var filename = file.name,
+        if (Array.isArray(sec_file)) {
+            sec_file.forEach(dt => {
+                var file = dt;
+                var filename = file.name,
+                    // file_name = filename.split('.')[0] + '_' + new Date() + '.' + filename.split('.')[1],
+                    file_path = "uploads/" + res_name + "/" + menu_name + "/" + filename;
+                // console.log(filename);
+
+                file.mv(UploadsPath + filename, async (err) => {
+                    if (err) {
+                        console.log(`${filename} not uploaded`);
+                    } else {
+                        console.log(`Successfully ${filename} uploaded`);
+                        await OtherImageSave(data, file_path);
+                    }
+                })
+                return new Promise((resolve, reject) => {
+                    resolve(true);
+                });
+            })
+        } else {
+            var filename = sec_file.name,
                 // file_name = filename.split('.')[0] + '_' + new Date() + '.' + filename.split('.')[1],
-                file_path = "uploads/" + res_name + "/" + menu_name + "/menu/" + filename;
+                file_path = "uploads/" + res_name + "/" + menu_name + "/" + filename;
             // console.log(filename);
 
-            file.mv(UploadsPath + filename, async (err) => {
+            sec_file.mv(UploadsPath + filename, async (err) => {
                 if (err) {
                     console.log(`${filename} not uploaded`);
                 } else {
@@ -159,7 +200,45 @@ const UploadMenu = async (menu_img, menu_name, res_name, data) => {
             return new Promise((resolve, reject) => {
                 resolve(true);
             });
+        }
+
+    }
+}
+
+TestRouter.post('/logo', async (req, res) => {
+    console.log({ body: req.body, fl: req.files, req });
+    let res_name = req.body.restaurant_name.replace(' ', '_');
+    var data = await UploadLogo(req.files.logo_img, res_name, req.body);
+    res.send(data);
+})
+
+const UploadLogo = async (logo_img, res_name, data) => {
+    var dt = '';
+    if (logo_img) {
+        var file = logo_img;
+        var filename = file.name,
+            file_ext = filename.split('.')[1],
+            file_name = "logo." + file_ext,
+            file_path = "uploads/" + res_name + "/" + file_name;
+        var ResIdPath = "public/uploads/" + res_name + "/";
+
+        if (!fs.existsSync(ResIdPath)) {
+            fs.mkdirSync(ResIdPath);
+        }
+
+        file.mv(ResIdPath + file_name, async (err) => {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log('Logo Uploaded ' + file_path);
+            }
         })
+
+        return new Promise(async (resolve, reject) => {
+            dt = await LogoSave(data, file_path)
+            resolve(dt);
+        })
+
     }
 }
 
@@ -210,4 +289,4 @@ TestRouter.post('/t', (req, res) => {
     res.send(v1)
 })
 
-module.exports = { TestRouter };
+module.exports = { TestRouter, UploadLogo };
