@@ -33,19 +33,21 @@ TestRouter.post('/testing', async (req, res) => {
 })
 
 const UploadCover = async (cov_img, top_img, menu_name, res_name, data) => {
+    var top_file_path = '',
+        cov_file_path = '';
     if (cov_img && top_img) {
         var cov_file = cov_img;
         var top_file = top_img;
         var filename = cov_file.name,
             top_fl_name = top_img.name,
             top_file_ext = top_fl_name.split('.')[1],
-            top_file_name = "top." + top_file_ext,
-            top_file_path = "uploads/" + res_name + "/" + menu_name + "/" + top_file_name;
+            top_file_name = "top." + top_file_ext;
+        top_file_path = "uploads/" + res_name + "/" + menu_name + "/" + top_file_name;
         let file_ext = filename.split('.')[1];
         var ResIdPath = "public/uploads/" + res_name;
         var UploadsPath = ResIdPath + "/" + menu_name + "/";
         var cov_file_name = "cover." + file_ext;
-        var cov_file_path = "uploads/" + res_name + "/" + menu_name + "/" + cov_file_name;
+        cov_file_path = "uploads/" + res_name + "/" + menu_name + "/" + cov_file_name;
 
         if (!fs.existsSync(ResIdPath)) {
             fs.mkdirSync(ResIdPath);
@@ -73,19 +75,28 @@ const UploadCover = async (cov_img, top_img, menu_name, res_name, data) => {
             }
         })
 
-        return new Promise(async (resolve, reject) => {
-            if (await MenuImageSave(data, cov_file_path, top_file_path)) {
-                res = true;
-            } else {
-                res = false
-            }
-            resolve(res);
-        })
-
+        // return new Promise(async (resolve, reject) => {
+        //     if (await MenuImageSave(data, cov_file_path, top_file_path)) {
+        //         res = true;
+        //     } else {
+        //         res = false
+        //     }
+        //     resolve(res);
+        // })
     }
+
+    return new Promise(async (resolve, reject) => {
+        if (await MenuImageSave(data, cov_file_path, top_file_path)) {
+            res = true;
+        } else {
+            res = false
+        }
+        resolve(res);
+    })
 }
 
 const UploadSection = async (sec_img, menu_name, res_name, data) => {
+    var file_path = '';
     if (sec_img) {
         // console.log();
         var sec_file = sec_img,
@@ -106,9 +117,9 @@ const UploadSection = async (sec_img, menu_name, res_name, data) => {
         if (Array.isArray(sec_img)) {
             sec_file.forEach(dt => {
                 var file = dt;
-                var filename = file.name,
-                    // file_name = filename.split('.')[0] + '_' + new Date() + '.' + filename.split('.')[1],
-                    file_path = "uploads/" + res_name + "/" + menu_name + "/" + filename;
+                var filename = file.name;
+                // file_name = filename.split('.')[0] + '_' + new Date() + '.' + filename.split('.')[1],
+                file_path = "uploads/" + res_name + "/" + menu_name + "/" + filename;
                 // console.log(filename);
 
                 file.mv(UploadsPath + filename, async (err) => {
@@ -116,12 +127,12 @@ const UploadSection = async (sec_img, menu_name, res_name, data) => {
                         console.log(`${filename} not uploaded`);
                     } else {
                         console.log(`Successfully ${filename} uploaded`);
-                        await SectionImageSave(data, file_path);
+                        // await SectionImageSave(data, file_path);
                     }
                 })
-                return new Promise((resolve, reject) => {
-                    resolve(true);
-                });
+                // return new Promise((resolve, reject) => {
+                //     resolve(true);
+                // });
             })
         } else {
             var filename = sec_file.name,
@@ -135,18 +146,28 @@ const UploadSection = async (sec_img, menu_name, res_name, data) => {
                 } else {
                     console.log(`Successfully ${filename} uploaded`);
                     console.log(data);
-                    await SectionImageSave(data, file_path);
+                    // await SectionImageSave(data, file_path);
                 }
             })
-            return new Promise((resolve, reject) => {
-                resolve(true);
-            });
+            // return new Promise((resolve, reject) => {
+            //     resolve(true);
+            // });
         }
 
+
     }
+
+    return new Promise(async (resolve, reject) => {
+        if (await SectionImageSave(data, file_path)) {
+            resolve(true);
+        } else {
+            resolve(false);
+        }
+    });
 }
 
 const UploadMenu = async (menu_img, menu_name, res_name, data) => {
+    var file_path = '';
     if (menu_img) {
         var sec_file = menu_img,
             // filename = sec_file.name,
@@ -166,9 +187,9 @@ const UploadMenu = async (menu_img, menu_name, res_name, data) => {
         if (Array.isArray(sec_file)) {
             sec_file.forEach(dt => {
                 var file = dt;
-                var filename = file.name,
-                    // file_name = filename.split('.')[0] + '_' + new Date() + '.' + filename.split('.')[1],
-                    file_path = "uploads/" + res_name + "/" + menu_name + "/" + filename;
+                var filename = file.name;
+                // file_name = filename.split('.')[0] + '_' + new Date() + '.' + filename.split('.')[1],
+                file_path = "uploads/" + res_name + "/" + menu_name + "/" + filename;
                 // console.log(filename);
 
                 file.mv(UploadsPath + filename, async (err) => {
@@ -176,12 +197,12 @@ const UploadMenu = async (menu_img, menu_name, res_name, data) => {
                         console.log(`${filename} not uploaded`);
                     } else {
                         console.log(`Successfully ${filename} uploaded`);
-                        await OtherImageSave(data, file_path);
+                        // await OtherImageSave(data, file_path);
                     }
                 })
-                return new Promise((resolve, reject) => {
-                    resolve(true);
-                });
+                // return new Promise((resolve, reject) => {
+                //     resolve(true);
+                // });
             })
         } else {
             var filename = sec_file.name,
@@ -194,15 +215,22 @@ const UploadMenu = async (menu_img, menu_name, res_name, data) => {
                     console.log(`${filename} not uploaded`);
                 } else {
                     console.log(`Successfully ${filename} uploaded`);
-                    await OtherImageSave(data, file_path);
+                    // await OtherImageSave(data, file_path);
                 }
             })
-            return new Promise((resolve, reject) => {
-                resolve(true);
-            });
+            // return new Promise((resolve, reject) => {
+            //     resolve(true);
+            // });
         }
 
     }
+    return new Promise(async (resolve, reject) => {
+        if (await OtherImageSave(data, file_path)) {
+            resolve(true);
+        } else {
+            resolve(false);
+        }
+    });
 }
 
 TestRouter.post('/logo', async (req, res) => {
@@ -213,7 +241,8 @@ TestRouter.post('/logo', async (req, res) => {
 })
 
 const UploadLogo = async (logo_img, res_name, data) => {
-    var dt = '';
+    var dt = '',
+        file_path = '';
     if (logo_img) {
         var file = logo_img;
         var filename = file.name,
@@ -234,12 +263,17 @@ const UploadLogo = async (logo_img, res_name, data) => {
             }
         })
 
-        return new Promise(async (resolve, reject) => {
-            dt = await LogoSave(data, file_path)
-            resolve(dt);
-        })
+        // return new Promise(async (resolve, reject) => {
+        //     dt = await LogoSave(data, file_path)
+        //     resolve(dt);
+        // })
 
     }
+
+    return new Promise(async (resolve, reject) => {
+        dt = await LogoSave(data, file_path)
+        resolve(dt);
+    })
 }
 
 TestRouter.post('/t', (req, res) => {
