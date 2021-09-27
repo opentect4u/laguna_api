@@ -24,7 +24,7 @@ TestRouter.post('/testing', async (req, res) => {
     // var upload_cover_top = await UploadCover(req.files.cov_img, req.files.top_img, menu_name, res_name, req.body),
     //     upload_sec = await UploadSection(req.files.section_img, menu_name, res_name, req.body),
     //     upload_menu = await UploadMenu(req.files.menu_img, menu_name, res_name, req.body);
-    var upload_cover_top = await UploadCover(menu_name, res_name, req.body),
+    var upload_cover_top = await UploadCover(req.files.cov_img, req.files.top_img, menu_name, res_name, req.body),
         upload_sec = await UploadSection(menu_name, res_name, req.body),
         upload_menu = await UploadMenu(menu_name, res_name, req.body);
     // month_day_save = await MonthDateSave(req.body);
@@ -38,55 +38,55 @@ TestRouter.post('/testing', async (req, res) => {
 const UploadCover = async (menu_name, res_name, data) => {
     var top_file_path = '',
         cov_file_path = '';
-    // if (cov_img && top_img) {
-    //     var cov_file = cov_img;
-    //     var top_file = top_img;
-    //     var filename = cov_file.name,
-    //         top_fl_name = top_img.name,
-    //         top_file_ext = top_fl_name.split('.')[1],
-    //         top_file_name = "top." + top_file_ext;
-    //     top_file_path = "uploads/" + res_name + "/" + menu_name + "/" + top_file_name;
-    //     let file_ext = filename.split('.')[1];
-    //     var ResIdPath = "public/uploads/" + res_name;
-    //     var UploadsPath = ResIdPath + "/" + menu_name + "/";
-    //     var cov_file_name = "cover." + file_ext;
-    //     cov_file_path = "uploads/" + res_name + "/" + menu_name + "/" + cov_file_name;
+    if (cov_img && top_img) {
+        var cov_file = cov_img;
+        var top_file = top_img;
+        var filename = cov_file.name,
+            top_fl_name = top_img.name,
+            top_file_ext = top_fl_name.split('.')[1],
+            top_file_name = "top." + top_file_ext;
+        top_file_path = "uploads/" + top_file_name;
+        let file_ext = filename.split('.')[1];
+        var ResIdPath = "uploads/";
+        var UploadsPath = ResIdPath + "/" + menu_name;
+        var cov_file_name = "cover." + file_ext;
+        cov_file_path = "uploads/" + cov_file_name;
 
-    //     if (!fs.existsSync(ResIdPath)) {
-    //         fs.mkdirSync(ResIdPath);
-    //         fs.mkdirSync(UploadsPath);
-    //     } else {
-    //         if (!fs.existsSync(UploadsPath)) {
-    //             fs.mkdirSync(UploadsPath);
-    //         }
-    //     }
-    //     // console.log(filename);
+        if (!fs.existsSync(ResIdPath)) {
+            fs.mkdirSync(ResIdPath);
+            fs.mkdirSync(UploadsPath);
+        } else {
+            if (!fs.existsSync(UploadsPath)) {
+                fs.mkdirSync(UploadsPath);
+            }
+        }
+        // console.log(filename);
 
-    //     cov_file.mv(UploadsPath + cov_file_name, async (err) => {
-    //         if (err) {
-    //             console.log(err);
-    //         } else {
-    //             console.log('Other Image Cover Uploaded');
-    //         }
-    //     })
+        cov_file.mv(UploadsPath + cov_file_name, async (err) => {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log('Other Image Cover Uploaded');
+            }
+        })
 
-    //     top_file.mv(UploadsPath + top_file_name, async (err) => {
-    //         if (err) {
-    //             console.log(err);
-    //         } else {
-    //             console.log('Other Image Top Uploaded');
-    //         }
-    //     })
+        top_file.mv(UploadsPath + top_file_name, async (err) => {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log('Other Image Top Uploaded');
+            }
+        })
 
-    //     // return new Promise(async (resolve, reject) => {
-    //     //     if (await MenuImageSave(data, cov_file_path, top_file_path)) {
-    //     //         res = true;
-    //     //     } else {
-    //     //         res = false
-    //     //     }
-    //     //     resolve(res);
-    //     // })
-    // }
+        // return new Promise(async (resolve, reject) => {
+        //     if (await MenuImageSave(data, cov_file_path, top_file_path)) {
+        //         res = true;
+        //     } else {
+        //         res = false
+        //     }
+        //     resolve(res);
+        // })
+    }
 
     return new Promise(async (resolve, reject) => {
         if (await MenuImageSave(data, cov_file_path, top_file_path)) {
