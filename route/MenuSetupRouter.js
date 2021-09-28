@@ -35,11 +35,11 @@ MenuSetRouter.get('/menu_setup', async (req, res) => {
     //     left JOIN td_logo b ON a.restaurant_id = b.restaurant_id
     //     left JOIN td_menu_image c ON a.restaurant_id = c.restaurant_id
     //     WHERE a.restaurant_id = "${id}"`;
-    let oth_sql = `SELECT menu_id, active_flag, cover_page_img, cover_page_url, top_image_img, top_img_url FROM td_other_image WHERE restaurant_id = "${id}"`;
+    let oth_sql = `SELECT id, menu_id, active_flag, cover_page_img, cover_page_url, top_image_img, top_img_url FROM td_other_image WHERE restaurant_id = "${id}"`;
     var oth_dt = await F_Select(oth_sql),
-        logo_sql = `SELECT logo_url, logo_path FROM td_logo WHERE restaurant_id = "${id}"`,
+        logo_sql = `SELECT id, logo_url, logo_path FROM td_logo WHERE restaurant_id = "${id}"`,
         logo_dt = await F_Select(logo_sql),
-        menu_sql = `SELECT menu_id, active_flag, menu_url, menu_img FROM td_menu_image WHERE restaurant_id = "${id}"`,
+        menu_sql = `SELECT id, menu_id, active_flag, menu_url, menu_img FROM td_menu_image WHERE restaurant_id = "${id}"`,
         menu_dt = await F_Select(menu_sql)
     var data = { suc: 1, oth_dt: oth_dt.msg, logo_dt: logo_dt.msg, menu_dt: menu_dt.msg };
     res.send(data);
@@ -48,7 +48,7 @@ MenuSetRouter.get('/menu_setup', async (req, res) => {
 MenuSetRouter.get('/section_image', async (req, res) => {
     let res_id = req.query.id;
     let menu_id = req.query.menu_id;
-    let sql = `SELECT menu_id, sec_url FROM td_section_image_request WHERE restaurant_id = "${res_id}" AND menu_id = "${menu_id}" ORDER BY id`;
+    let sql = `SELECT menu_id, sec_url, sec_img FROM td_section_image_request WHERE restaurant_id = "${res_id}" AND menu_id = "${menu_id}" ORDER BY id`;
     var data = await F_Select(sql);
     res.send(data);
 })
@@ -77,11 +77,11 @@ MenuSetRouter.get('/aboutus', async (req, res) => {
     res.send(data);
 })
 
-MenuSetRouter.post('/section', async (req, res) => {
-    console.log(req.body);
-    var data = await SectionSave(req.body);
-    res.send(data);
-})
+// MenuSetRouter.post('/section', async (req, res) => {
+//     console.log(req.body);
+//     var data = await SectionSave(req.body);
+//     res.send(data);
+// })
 
 MenuSetRouter.get('/section', async (req, res) => {
     let res_id = req.query.id;

@@ -1,7 +1,8 @@
 const express = require('express')
 const upload = require('express-fileupload')
 const fs = require('fs');
-const { MenuImageSave, SectionImageSave, OtherImageSave, MonthDateSave, LogoSave } = require('../modules/MenuSetupModule');
+const db = require('../core/db');
+const { MenuImageSave, SectionImageSave, OtherImageSave, MonthDateSave, LogoSave, SectionSave } = require('../modules/MenuSetupModule');
 const TestRouter = express.Router();
 // const db = require('./db')
 
@@ -42,8 +43,8 @@ TestRouter.post('/testing', async (req, res) => {
     }
 
     var dt = await MenuImageSave(req.body, cov_file_name, top_img_name);
-    var upload_menu = await UploadMenu(req.files.menu_img, req.body);
-    var upload_sec = await UploadSection(req.files.section_img, req.body);
+    var upload_menu = await UploadMenu(req.files.menu_img ? req.files.menu_img : null, req.body);
+    var upload_sec = await UploadSection(req.files.section_img ? req.files.section_img : null, req.body);
     res.send({ suc: 1, msg: 'Success' });
 })
 
@@ -152,7 +153,7 @@ const UploadSection = async (sec_img, data) => {
 
 const UploadMenu = async (menu_img, data) => {
     var file_path = '';
-    console.log({ menu_len: menu_img });
+    // console.log({ menu_len: menu_img });
     if (menu_img) {
         var sec_file = menu_img,
             // filename = sec_file.name,
@@ -220,6 +221,114 @@ const UploadLogo = async (logo_img, data) => {
     } else {
         await LogoSave(data, file_path);
     }
+}
+
+TestRouter.post('/cover_save', async (req, res) => {
+    var img_type = 'cover';
+    var dt = await CoverImgUpload(req.files.cov_img, img_type, req.body);
+    res.send(dt);
+})
+
+const CoverImgUpload = async (files, img_type, data) => {
+    var filename = '',
+        dt = '';
+    if (files) {
+        var filename = data.restaurant_id + '_' + data.menu_id + '_' + img_type + '_' + files.name;
+        return new Promise(async (resolve, reject) => {
+            files.mv('uploads/' + filename, async (err) => {
+                if (err) {
+                    console.log(`${filename} not uploaded`);
+                } else {
+                    console.log(`Successfully ${filename} uploaded`);
+                    dt = await UpdateOtherImg(`cover_page_url = "${data.cov_url}", cover_page_img = "${filename}"`, `id = "${data.id}" AND restaurant_id = "${data.restaurant_id}"`, 'td_other_image');
+                }
+                resolve(dt);
+            })
+        })
+    } else {
+        return new Promise(async (resolve, reject) => {
+            dt = await UpdateOtherImg(`cover_page_url = "${data.cov_url}", cover_page_img = "${filename}"`, `id = "${data.id}" AND restaurant_id = "${data.restaurant_id}"`, 'td_other_image');
+            resolve(dt);
+        })
+    }
+}
+
+TestRouter.post('/top_save', async (req, res) => {
+    var img_type = 'top';
+    var dt = await TopImgUpload(req.files.top_img, img_type, req.body);
+    res.send(dt);
+})
+
+const TopImgUpload = async (files, img_type, data) => {
+    var filename = '',
+        dt = '';
+    if (files) {
+        var filename = data.restaurant_id + '_' + data.menu_id + '_' + img_type + '_' + files.name;
+        return new Promise(async (resolve, reject) => {
+            files.mv('uploads/' + filename, async (err) => {
+                if (err) {
+                    console.log(`${filename} not uploaded`);
+                } else {
+                    console.log(`Successfully ${filename} uploaded`);
+                    dt = await UpdateOtherImg(`top_img_url = "${data.top_url}", top_image_img = "${filename}"`, `id = "${data.id}" AND restaurant_id = "${data.restaurant_id}"`, 'td_other_image');
+                    resolve(dt);
+                }
+            })
+        })
+    } else {
+        return new Promise(async (resolve, reject) => {
+            dt = await UpdateOtherImg(`top_img_url = "${data.top_url}", top_image_img = "${filename}"`, `id = "${data.id}" AND restaurant_id = "${data.restaurant_id}"`, 'td_other_image');
+            resolve(dt);
+        })
+    }
+}
+
+TestRouter.post('/section', async (req, res) => {
+    var sec_name = req.body.sec_name.replace(' ', '_');
+    var img_type = 'section' + sec_name;
+    var dt = await UploadSectionImg(req.files ? req.files.sec_img : null, img_type, req.body);
+    res.send(dt);
+})
+
+const UploadSectionImg = (files, img_type, data) => {
+    var filename = '',
+        dt = '';
+    if (files) {
+        var filename = data.restaurant_id + '_' + data.menu_id + '_' + img_type + '_' + files.name;
+        return new Promise(async (resolve, reject) => {
+            files.mv('uploads/' + filename, async (err) => {
+                if (err) {
+                    console.log(`${filename} not uploaded`);
+                } else {
+                    console.log(`Successfully ${filename} uploaded`);
+                    dt = await SectionSave(data, filename);
+                    resolve(dt);
+                }
+            })
+        })
+    } else {
+        return new Promise(async (resolve, reject) => {
+            dt = await SectionSave(data, filename);
+            resolve(dt);
+        })
+    }
+}
+
+const UpdateOtherImg = (fields, whr, table_name) => {
+    var sql = `UPDATE ${table_name} SET ${fields} WHERE ${whr}`;
+    var res = '';
+    console.log(sql);
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err, lastId) => {
+            if (err) {
+                console.log(err);
+                res = { suc: 0, msg: 'Not Updated' };
+            } else {
+                res = { suc: 1, msg: 'Updated Successfully' };
+            }
+            resolve(res)
+        })
+    })
 }
 
 module.exports = { TestRouter, UploadLogo };
