@@ -1,7 +1,7 @@
 const db = require('../core/db');
 var data = '';
 const PreviewMenu = (res_id, st_time, end_time) => {
-    var dat = new Array();
+    var dat = {};
     let sec_sql = `SELECT a.id, a.section_id, c.restaurant_id, c.section_name, e.start_time, e.end_time
     FROM md_item_description a, md_section c, td_date_time e
     WHERE a.section_id = c.id
@@ -19,15 +19,16 @@ const PreviewMenu = (res_id, st_time, end_time) => {
             } else {
                 for (let i = 0; i < result.length; i++) {
                     var res = await GetDataRes(result[i].section_id, res_id, st_time, end_time);
-                    dat[result[i].section_name] = { res };
+                    dat[result[i].section_name] = res;
                     // console.log(dat);
                 }
                 // console.log(dat);
                 data = { suc: 1, msg: 'Success', res: dat };
                 // console.log({ dat });
             }
+            console.log(dat);
             // console.log(dat);
-            resolve({ dat })
+            resolve(data)
         })
     })
 

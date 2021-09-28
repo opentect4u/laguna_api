@@ -8,15 +8,6 @@ const TestRouter = express.Router();
 
 TestRouter.use(upload());
 
-//var dir = 'public';
-//var subDir = "public/uploads";
-
-//if (!fs.existsSync(dir)) {
-//    fs.mkdirSync(dir);
-
-//    fs.mkdirSync(subDir);
-//}
-
 TestRouter.post('/testing', async (req, res) => {
     // console.log({ bd: req.body });
     var cov_file_name = '',

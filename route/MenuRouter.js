@@ -7,9 +7,9 @@ MenuRouter.get('/preview_menu', async (req, res) => {
         str_time = req.query.st_time,
         end_time = req.query.end_time;
     var data = await PreviewMenu(res_id, str_time, end_time);
-    console.log(data);
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(data));
+    // console.log(data);
+    // res.setHeader('Content-Type', 'application/json');
+    res.send(data);
     // res.send(data);
 })
 
