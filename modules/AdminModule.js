@@ -25,7 +25,7 @@ const PackageSave = async (data) => {
     var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
     var sql = '';
     if (check > 1) {
-        sql = `INSERT INTO md_package (pakage_name, no_of_menu, special_menu, setup_fee, monthly_fee, created_by, created_dt) VALUES ("${data.Serial_no}", "${data.Menu_number}", "${data.Special_Menu}", "${data.SetUp_Fee}", "${data.Monthly_Fee}", "${data.Description}", "${user}", "${datetime}")`;
+        sql = `INSERT INTO md_package (pakage_name, no_of_menu, special_menu, setup_fee, monthly_fee, created_by, created_dt) VALUES ("${data.Serial_no}", "${data.Menu_number}", "${data.Special_Menu}", "${data.SetUp_Fee}", "${data.Monthly_Fee}", "${user}", "${datetime}")`;
     } else {
         sql = `UPDATE md_package SET no_of_menu= "${data.Serial_no}", special_menu= "${data.Special_Menu}", setup_fee= "${data.SetUp_Fee}", monthly_fee= "${data.Monthly_Fee}", modified_by= "${user}", modified_dt= "${datetime}" WHERE pakage_name = ${data.Serial_no}`;
     }
