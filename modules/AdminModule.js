@@ -1,4 +1,5 @@
 const db = require('../core/db');
+const dateFormat = require('dateformat');
 var data = '';
 
 const GetPackageData = (data) => {
@@ -20,11 +21,13 @@ const GetPackageData = (data) => {
 
 const PackageSave = async (data) => {
     var check = await CheckPackage(data,);
+    var user = 'admin@gmail.com';
+    var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
     var sql = '';
     if (check > 1) {
-        sql = `INSERT INTO md_package (pakage_name, no_of_menu, special_menu, setup_fee, monthly_fee, pack_description, created_by, created_dt) VALUES ("${data.Serial_no}", "${data.Menu_number}", "${data.Special_Menu}", "${data.SetUp_Fee}", "${data.Monthly_Fee}", "${data.Description}", "Subham", "2021-09-15")`;
+        sql = `INSERT INTO md_package (pakage_name, no_of_menu, special_menu, setup_fee, monthly_fee, created_by, created_dt) VALUES ("${data.Serial_no}", "${data.Menu_number}", "${data.Special_Menu}", "${data.SetUp_Fee}", "${data.Monthly_Fee}", "${data.Description}", "${user}", "${datetime}")`;
     } else {
-        sql = `UPDATE md_package SET no_of_menu= "${data.Serial_no}", special_menu= "${data.Special_Menu}", setup_fee= "${data.SetUp_Fee}", monthly_fee= "${data.Monthly_Fee}", pack_description= "${data.Description}", modified_by= "Subham", modified_dt= "2021-09-15" WHERE pakage_name = ${data.Serial_no}`;
+        sql = `UPDATE md_package SET no_of_menu= "${data.Serial_no}", special_menu= "${data.Special_Menu}", setup_fee= "${data.SetUp_Fee}", monthly_fee= "${data.Monthly_Fee}", modified_by= "${user}", modified_dt= "${datetime}" WHERE pakage_name = ${data.Serial_no}`;
     }
     return new Promise((resolve, reject) => {
         db.query(sql, (err, result) => {
@@ -75,11 +78,13 @@ const GetResult = (tb_name) => {
 
 const PromoSave = async (data) => {
     var check = await CheckData(data, tb_name = 'md_promo_calander');
+    var user = 'admin@gmail.com';
+    var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
     var sql = '';
     if (check > 1) {
-        sql = `INSERT INTO md_promo_calander (id, free_flag, price, created_by, created_dt) VALUES ("${data.serial_no}", "${data.free}", "${data.price}", "Subham", "2021-09-15")`;
+        sql = `INSERT INTO md_promo_calander (id, free_flag, price, created_by, created_dt) VALUES ("${data.serial_no}", "${data.free}", "${data.price}", "${user}", "${datetime}")`;
     } else {
-        sql = `UPDATE md_promo_calander SET free_flag= "${data.free}", price= "${data.price}", modified_by= "Subham", modified_dt= "2021-09-15" WHERE id = ${data.serial_no}`;
+        sql = `UPDATE md_promo_calander SET free_flag= "${data.free}", price= "${data.price}", modified_by= "${user}", modified_dt= "${datetime}" WHERE id = ${data.serial_no}`;
     }
     return new Promise((resolve, reject) => {
         db.query(sql, (err, lastId) => {
@@ -97,10 +102,12 @@ const PromoSave = async (data) => {
 const HolderClingSave = async (data) => {
     var check = await CheckData(data, tb_name = 'md_holder_cling');
     var sql = '';
+    var user = 'admin@gmail.com';
+    var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
     if (check > 1) {
-        sql = `INSERT INTO md_holder_cling (id, free_flag, price, created_by, created_dt) VALUES ("${data.serial_no}", "${data.free_flag}", "${data.per_Holder_Price}", "Subham", "2021-09-15")`;
+        sql = `INSERT INTO md_holder_cling (id, free_flag, price, created_by, created_dt) VALUES ("${data.serial_no}", "${data.free_flag}", "${data.per_Holder_Price}", "${user}", "${datetime}")`;
     } else {
-        sql = `UPDATE md_holder_cling SET free_flag= "${data.free_flag}", price= "${data.per_Holder_Price}", modified_by= "Subham", modified_dt= "2021-09-15" WHERE id = ${data.serial_no}`;
+        sql = `UPDATE md_holder_cling SET free_flag= "${data.free_flag}", price= "${data.per_Holder_Price}", modified_by= "${user}", modified_dt= "${datetime}" WHERE id = ${data.serial_no}`;
     }
     return new Promise((resolve, reject) => {
         db.query(sql, (err, lastId) => {
