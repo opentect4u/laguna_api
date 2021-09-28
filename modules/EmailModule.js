@@ -29,17 +29,29 @@ const send_email = async (email_id, img, con_name, pro_name, email_name) => {
     // var sql = `UPDATE md_users SET password = "${pass}", modified_by = "${email_id}", modified_dt = "${datetime}" WHERE user_id = "${email_id}"`;
     return new Promise(async (resolve, reject) => {
         // FOR LOCAL
+        // var transporter = nodemailer.createTransport({
+        //     service: 'gmail',
+        //     auth: {
+        //         user: 'synergicbbps@gmail.com',
+        //         pass: 'Signature@123'
+        //     }
+        // });
+
+        // FOR SERVER
         var transporter = nodemailer.createTransport({
-            service: 'gmail',
+            host: 'webmail.betaiskusltd.com',
+            port: 25,
+            secure: false,
             auth: {
-                user: 'synergicbbps@gmail.com',
-                pass: 'Signature@123'
-            }
+                user: 'info@shoplocal-lagunabeach.com',
+                pass: 'dY786#lw!Laguna'
+            },
+            tls: { rejectUnauthorized: false }
         });
 
         var mailOptions = {
-            from: 'support@synergicportal.in',
-            to: 'sumanmitra0096@gmail.com', //email_id,
+            from: 'info@shoplocal-lagunabeach.com',
+            to: email_id,
             subject: 'SynergicPortal',
             html: '<!DOCTYPE html>'
                 + '<html>'
