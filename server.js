@@ -14,7 +14,7 @@ app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
 
-app.use(express.static('assets'));
+app.use(express.static('uploads'));
 
 // CALLING ROUTER MODULE FOLDER LOCATION //
 const { RegRouter } = require('./route/RegistrationRoute');

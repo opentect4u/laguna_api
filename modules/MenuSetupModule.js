@@ -134,7 +134,8 @@ const SectionImageSave = async (data, sec_img) => {
 
 const MonthDateSave = async (data) => {
 
-    var sql = '';
+    var sql = '',
+        res = true;
     await DeleteDatetime(data);
     return new Promise((resolve, reject) => {
         var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
@@ -193,9 +194,10 @@ const LogoSave = async (data, logo_img) => {
         sql = `INSERT INTO td_logo (restaurant_id, logo_url, logo_path, created_by, created_dt) VALUES
         ("${data.restaurant_id}", "${data.logo}", "${logo_img}", "${data.restaurant_id}", "${datetime}")`;
     } else if (chk_dt == 1) {
-        sql = `UPDATE td_about SET logo_url = "${data.logo}", logo_path = "${logo_img}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
+        sql = `UPDATE td_logo SET logo_url = "${data.logo}", logo_path = "${logo_img}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
         WHERE restaurant_id = "${data.restaurant_id}"`;
     }
+    console.log(sql);
     // var sql = `INSERT INTO td_logo (restaurant_id, logo_url, created_by, created_dt) VALUES 
     // ("${data.restaurant_id}", "${data.logo}", "${data.restaurant_id}", "${datetime}")`;
 
@@ -365,7 +367,7 @@ const ItemPriceSave = (data) => {
     })
 }
 
-const create = async (dataForQRcode, center_image, width, cwidth) => {
+const create = async (dataForQRcode, center_image, width, cwidth, data) => {
     const canvas = createCanvas(width, width);
     QRCode.toCanvas(
         canvas,
@@ -383,8 +385,8 @@ const create = async (dataForQRcode, center_image, width, cwidth) => {
     const ctx = canvas.getContext("2d");
     const img = await loadImage(center_image);
     const center = (width - cwidth) / 2;
-    let path = 'assets/qr.png';
-    let img_name = 'qr.png';
+    let img_name = data.res_id + '_qr.png';
+    let path = 'uploads/' + img_name;
     ctx.drawImage(img, center, center, cwidth, cwidth);
     const buffer = canvas.toBuffer("image/png");
     fs.writeFileSync(path, buffer)
@@ -398,22 +400,17 @@ const GenerateQr = async (data) => {
     const qrCode = await create(
         data.url,
         data.img,
-        145,
-        45
+        150,
+        50,
+        data
     );
+    let chk_dt = await Check_Data(db_name = 'md_url', whr = `WHERE restaurant_id = "${data.res_id}"`);
     var sql = '';
-    let ckh_sql = `SELECT * FROM md_url WHERE restaurant_id = "${data.res_id}"`;
-    db.query(ckh_sql, (err, result) => {
-        if (err) {
-            console.log(err);
-        } else {
-            if (result.length > 0) {
-                sql = `UPDATE md_url url = "${data.url}", image = "${qrCode.img_name}" WHERE restaurant_id = "${data.res_id}"`;
-            } else {
-                sql = `INSERT INTO md_url (restaurant_id, url, image) VALUES ("${data.res_id}", "${data.url}", "${qrCode.img_name}")`;
-            }
-        }
-    })
+    if (chk_dt > 1) {
+        sql = `INSERT INTO md_url (restaurant_id, url, image) VALUES ("${data.res_id}", "${data.url}", "${qrCode.img_name}")`;
+    } else {
+        sql = `UPDATE md_url SET url = "${data.url}", image = "${qrCode.img_name}" WHERE restaurant_id = "${data.res_id}"`;
+    }
     return new Promise((resolve, reject) => {
         db.query(sql, (err, lastId) => {
             if (err) {
@@ -422,9 +419,12 @@ const GenerateQr = async (data) => {
             } else {
                 data = { suc: 1, msg: 'Inserted Successfully !!' };
             }
+            console.log(data);
             resolve(data)
         })
     })
+    // let ckh_sql = `SELECT * FROM md_url WHERE `;
+
 }
 
 module.exports = {

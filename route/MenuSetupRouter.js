@@ -58,12 +58,13 @@ MenuSetRouter.get('/date_time', async (req, res) => {
     let menu_id = req.query.menu_id;
     let sql = `SELECT restaurant_id, menu_id, month_day, start_time, end_time FROM td_date_time WHERE restaurant_id = "${res_id}" AND menu_id = "${menu_id}"`;
     var data = await F_Select(sql);
+    console.log(data);
     res.send(data);
 })
 
 MenuSetRouter.post('/date_time', async (req, res) => {
     console.log(req.body);
-    var data = await MonthDateSave(req.body[0]);
+    var dt = await MonthDateSave(req.body[0]);
     var data = dt ? { suc: 1, msg: 'Success' } : { suc: 0, msg: 'Not Inserted' }
     res.send(data);
     // res.send(data);
@@ -148,6 +149,7 @@ MenuSetRouter.get('/get_url', async (req, res) => {
 MenuSetRouter.post('/generate_qr', async (req, res) => {
     console.log(req.body);
     var data = await GenerateQr(req.body);
+    console.log(data);
     res.send(data);
 })
 
