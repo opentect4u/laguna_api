@@ -22,6 +22,13 @@ LogRouter.get('/forgot_password', async (req, res) => {
     // console.log(dt.msg.length);
 })
 
+LogRouter.get('/check_activity', async (req, res) => {
+    let res_id = req.query.id;
+    var sql = `SELECT approval_flag, url, image FROM md_url WHERE restaurant_id = ${res_id}`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
 LogRouter.get('/check_menu_setup', async (req, res) => {
     let res_id = req.query.id;
     var sql = `SELECT a.restaurant_id, a.email_id, a.pwd, b.restaurant_name, b.contact_name, b.phone_no,

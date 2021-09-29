@@ -153,7 +153,7 @@ const PaySave = async (data) => {
 }
 
 const GetResturentDetails = (id) => {
-    var sql = `SELECT a.*, c.no_of_menu FROM td_contacts a, td_order_items b, md_package c WHERE a.id = "${id}" AND a.id=b.restaurant_id AND b.package_id=c.id`;
+    var sql = `SELECT a.*, c.no_of_menu, d.approval_flag FROM td_contacts a, td_order_items b, md_package c, md_url d WHERE a.id = "${id}" AND a.id=b.restaurant_id AND b.package_id=c.pakage_name AND a.id=d.restaurant_id`;
     return new Promise((resolve, reject) => {
         db.query(sql, (err, result) => {
             if (err) {
@@ -176,7 +176,7 @@ const SaveUrl = (id, data) => {
             console.log(err);
         } else {
             if (result.length > 0) {
-                sql = `UPDATE md_url url = "${data.url}" WHERE restaurant_id = "${id}"`;
+                sql = `UPDATE md_url SET url = "${data.url}" WHERE restaurant_id = "${id}"`;
             } else {
                 sql = `INSERT INTO md_url (restaurant_id, url) VALUES ("${id}", "${data.url}")`;
             }
