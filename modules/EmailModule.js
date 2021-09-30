@@ -52,7 +52,7 @@ const send_email = async (email_id, img, con_name, pro_name, email_name) => {
 
         var mailOptions = {
             from: 'admin@shoplocal-lagunabeach.com',
-            to: email_id,
+            to: "subham@synergicsoftek.in",//email_id,
             subject: 'SynergicPortal',
             html: '<!DOCTYPE html>'
                 + '<html>'
