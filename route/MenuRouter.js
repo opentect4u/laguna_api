@@ -67,7 +67,13 @@ MenuRouter.get('/menu_data', async (req, res) => {
     var end_time = '';
     var greet = '';
 
-    let curr_time = dateFormat(now, "HH:MM:ss");
+    var date_sql = `SELECT * FROM td_contacts WHERE id = "${res_id}"`
+    var con_dt = await F_Select(date_sql);
+    var zone = con_dt.msg[0].time_zone;
+    // console.log({ zone });
+    let loc_time = zone != '' ? new Date().toLocaleString('en-US', { timeZone: zone }) : new Date();
+    let curr_time = dateFormat(loc_time, "HH:MM:ss");
+    // console.log({ curr_time });
 
     if (curr_time >= breakfast_st && curr_time < lunch_st) {
         st_time = breakfast_st;
@@ -84,7 +90,7 @@ MenuRouter.get('/menu_data', async (req, res) => {
     }
 
     var result = await MenuData(res_id, st_time, end_time, menu_id = 0, menu_date);
-    console.log(result);
+    // console.log(result);
     res.send(result);
 })
 

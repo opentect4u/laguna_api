@@ -44,6 +44,18 @@ app.use(EmailRouter);
 
 app.use(MenuRouter);
 
+app.get('/', (req, res) => {
+    // var date = ;
+    var d = new Date().toLocaleTimeString({
+        timeZone: 'America/Managua'
+    })
+    const nDate = new Date().toLocaleString('en-US', {
+        timeZone: 'Asia/Tokyo'
+    });
+    console.log(nDate);
+    res.send('Success')
+})
+
 // CREATE EXPRESS SERVER //
 app.listen(port, (err) => {
     if (err) console.log(err);

@@ -9,7 +9,8 @@ const ResRegistration = (data) => {
     var add2_fl = data.Address2 ? ',addr_line2' : '';
     var add2_vl = data.Address2 ? `,"${data.Address2}"` : '';
     var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
-    var sql = `INSERT INTO td_contacts (contact_date, restaurant_name, contact_name, phone_no, email, addr_line1 ${add2_fl}, city, zip, country, website, created_by, created_at) VALUES ("${datetime}","${data.Name}", "${data.Contact}","${data.Telephone}","${data.Email}","${data.Address1}" ${add2_vl}, "${data.cityState}","${data.zip}","${data.country}","${data.Website}", "${data.Email}", "${datetime}")`;
+    var sql = `INSERT INTO td_contacts (contact_date, restaurant_name, contact_name, phone_no, email, addr_line1 ${add2_fl}, city, zip, country, time_zone, website, created_by, created_at) 
+    VALUES ("${datetime}","${data.Name}", "${data.Contact}","${data.Telephone}","${data.Email}","${data.Address1}" ${add2_vl}, "${data.cityState}","${data.zip}","${data.country}", "${data.time_zone}", "${data.Website}", "${data.Email}", "${datetime}")`;
     return new Promise((resolve, reject) => {
         db.query(sql, (err, result) => {
             if (err) {

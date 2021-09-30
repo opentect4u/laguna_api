@@ -35,4 +35,10 @@ RegRouter.get('/country', async (req, res) => {
     res.send(data);
 })
 
+RegRouter.get('/get_timezone', async (req, res) => {
+    let sql = `SELECT * FROM md_time_zone`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
 module.exports = { RegRouter };

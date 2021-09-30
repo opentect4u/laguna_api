@@ -39,7 +39,7 @@ AdmRouter.get('/update_approval', async (req, res) => {
 })
 
 AdmRouter.get('/res_menu', async (req, res) => {
-    var sql = `SELECT a.menu_id, b.menu_description as menu_name FROM td_other_image a, md_menu b WHERE a.menu_id=b.id AND a.restaurant_id = "${req.query.id}"`;
+    var sql = `SELECT a.menu_id, b.menu_description as menu_name, a.active_flag FROM td_other_image a, md_menu b WHERE a.menu_id=b.id AND a.restaurant_id = "${req.query.id}" AND a.active_flag="Y"`;
     var data = await F_Select(sql);
     res.send(data);
 })

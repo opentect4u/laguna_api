@@ -93,14 +93,14 @@ const send_email = async (email_id, img, con_name, pro_name, email_name) => {
         transporter.sendMail(mailOptions, function (error, info) {
             if (error) {
                 console.log(error);
-                data = { success: 0, message: 'Mail Not Sent Successfully' };
+                res = { success: 0, message: 'Mail Not Sent Successfully' };
             } else {
                 console.log('Email sent: ' + info.response);
-                data = { success: 1, message: 'Mail Sent Successfully' };
+                res = { success: 1, message: 'Mail Sent Successfully' };
             }
-        });
 
-        resolve(data);
+            resolve(res);
+        });
     })
 }
 
