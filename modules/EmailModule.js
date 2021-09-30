@@ -39,9 +39,10 @@ const send_email = async (email_id, img, con_name, pro_name, email_name) => {
 
         // FOR SERVER
         var transporter = nodemailer.createTransport({
+            pool: true,
             host: 'webmail.betaiskusltd.com',
             port: 25,
-            secure: false,
+            secure: true,
             auth: {
                 user: 'admin@shoplocal-lagunabeach.com',
                 pass: 'dY786#lw!Laguna'
