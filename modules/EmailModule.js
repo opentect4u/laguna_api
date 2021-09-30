@@ -43,14 +43,14 @@ const send_email = async (email_id, img, con_name, pro_name, email_name) => {
             port: 25,
             secure: false,
             auth: {
-                user: 'info@shoplocal-lagunabeach.com',
+                user: 'admin@shoplocal-lagunabeach.com',
                 pass: 'dY786#lw!Laguna'
             },
             tls: { rejectUnauthorized: false }
         });
 
         var mailOptions = {
-            from: 'info@shoplocal-lagunabeach.com',
+            from: 'admin@shoplocal-lagunabeach.com',
             to: email_id,
             subject: 'SynergicPortal',
             html: '<!DOCTYPE html>'
