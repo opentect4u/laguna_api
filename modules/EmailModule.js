@@ -4,6 +4,7 @@ const { F_Select } = require('./MenuSetupModule');
 const nodemailer = require('nodemailer');
 
 const ConfirmMenu = async (res_id) => {
+    var data = '';
     let qr_sql = `SELECT * FROM md_url WHERE restaurant_id = "${res_id}"`;
     let qr = await F_Select(qr_sql);
     let con_sql = `SELECT * FROM td_contacts WHERE id = "${res_id}"`;
@@ -16,8 +17,12 @@ const ConfirmMenu = async (res_id) => {
         pro_name = param.msg[0].param_value,
         email_name = param.msg[1].param_value;
     console.log({ pro_name, email_name, con_name });
-    var data = await send_email(email, img, con_name, pro_name, email_name);
-    return data;
+
+    return new Promise(async (resolve, reject) => {
+        data = await send_email(email, img, con_name, pro_name, email_name);
+        resolve(data);
+    })
+    //return data;
     // console.log(qr.msg[0].image);
 }
 
@@ -39,25 +44,24 @@ const send_email = async (email_id, img, con_name, pro_name, email_name) => {
 
         // FOR SERVER
         var transporter = nodemailer.createTransport({
-            pool: true,
+            //pool: true,
             host: 'webmail.betaiskusltd.com',
             port: 25,
-            secure: true,
+            secure: false,
             auth: {
                 user: 'admin@shoplocal-lagunabeach.com',
                 pass: 'dY786#lw!Laguna'
-            },
-            tls: { rejectUnauthorized: false }
+            }
         });
 
         var mailOptions = {
-            from: 'admin@shoplocal-lagunabeach.com',
-            to: "subham@synergicsoftek.in",//email_id,
+            from: 'synergicbbps@gmail.com',
+            to: "admin@shoplocal-lagunabeach.com",//email_id,
             subject: 'SynergicPortal',
             html: '<!DOCTYPE html>'
                 + '<html>'
                 + '<head>'
-                + '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
+                + '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />'
                 + '<title>ShopLocal</title>'
                 + '<style type="text/css">'
                 + 'body{margin:0; padding:0; font-family:14px; font-family:Arial, Helvetica, sans-serif;}'
@@ -93,14 +97,14 @@ const send_email = async (email_id, img, con_name, pro_name, email_name) => {
         transporter.sendMail(mailOptions, function (error, info) {
             if (error) {
                 console.log(error);
-                res = { success: 0, message: 'Mail Not Sent Successfully' };
+                data = { success: 0, message: 'Mail Not Sent Successfully' };
             } else {
                 console.log('Email sent: ' + info.response);
-                res = { success: 1, message: 'Mail Sent Successfully' };
+                data = { success: 1, message: 'Email sent: ' + info.response };
             }
-
-            resolve(res);
+            resolve(data);
         });
+
     })
 }
 

@@ -48,8 +48,8 @@ const GetDataRes = (sec_id, res_id, st_time, end_time, menu_id, date) => {
                 AND a.menu_id = d.id
                 AND a.menu_id=e.menu_id
                 AND a.restaurant_id = "${res_id}"
-                AND e.start_time >= '${st_time}'
-                AND e.end_time <= '${end_time}'
+                AND e.start_time <= '${st_time}'
+                AND e.end_time >= '${end_time}'
                 AND a.section_id = "${sec_id}" ${whr_menu} ${whr_dt}
                 GROUP BY a.id
                 ORDER BY a.section_id`;
@@ -71,8 +71,8 @@ const CheckMenu = (res_id, st_time, end_time) => {
                 WHERE a.menu_id = d.id
                 AND a.menu_id=e.menu_id AND a.restaurant_id=e.restaurant_id
                 AND a.restaurant_id = "${res_id}"
-                AND e.start_time >= '${st_time}'
-                AND e.end_time <= '${end_time}'
+                AND e.start_time <= '${st_time}'
+                AND e.end_time >= '${end_time}'
                 GROUP BY a.menu_id
                 ORDER BY a.menu_id`;
     return new Promise((resolve, reject) => {
@@ -97,8 +97,8 @@ const MenuData = (res_id, st_time, end_time, menu_id, date) => {
     WHERE a.section_id = c.id
     AND a.menu_id=e.menu_id
     AND a.restaurant_id = "${res_id}"
-    AND e.start_time >= '${st_time}'
-    AND e.end_time <= '${end_time}' ${whr_menu} ${whr_dt}
+    AND e.start_time <= '${st_time}'
+    AND e.end_time >= '${end_time}' ${whr_menu} ${whr_dt}
     GROUP BY c.id
     ORDER BY c.id`;
     console.log(sec_sql);
@@ -119,10 +119,10 @@ const MenuData = (res_id, st_time, end_time, menu_id, date) => {
                 let oth_sql = `SELECT * FROM td_other_image WHERE restaurant_id = "${res_id}" AND menu_id = "${menu_id}"`;
                 let oth_data = await F_Select(oth_sql)
                 let menu_check = await CheckMenu(res_id, st_time, end_time);
-                let cov_img = oth_data.length > 0 ? oth_data.msg[0].cover_page_img : '',
-                    top_img = oth_data.length > 0 ? oth_data.msg[0].top_image_img : ''
+                let cov_img = oth_data.msg.length > 0 ? oth_data.msg[0].cover_page_img : '',
+                    top_img = oth_data.msg.length > 0 ? oth_data.msg[0].top_image_img : ''
                 // console.log(dat);
-                data = { suc: 1, msg: 'Success', res: dat, cov_img: cov_img, top_img: top_img, menu_check: menu_check.msg };
+                data = { suc: 1, msg: 'Success', res: dat, cov_img: cov_img, top_img: top_img, menu_check: menu_check.msg, len: sec_sql, dt: oth_data };
                 // let oth_sql = `SELECT * FROM td_other_image WHERE restaurant_id = "${res_id}" AND menu_id = "${result[0].menu_id}"`;
                 // let oth_data = await F_Select(oth_sql)
                 // let menu_check = await CheckMenu(res_id, st_time, end_time);
