@@ -24,6 +24,7 @@ const { MenuSetRouter } = require('./route/MenuSetupRouter');
 const { TestRouter } = require('./route/TestRoute');
 const { EmailRouter } = require('./route/EmailRouter');
 const { MenuRouter } = require('./route/MenuRouter');
+const { ImageSaveRouter } = require('./route/ImageSaveRouter');
 ///////////////////////////////////////////
 
 // REGISTRATION ROUTER RegistrationRouter.js FOLDER //
@@ -43,6 +44,8 @@ app.use(TestRouter);
 app.use(EmailRouter);
 
 app.use(MenuRouter);
+
+app.use(ImageSaveRouter);
 
 app.get('/', (req, res) => {
     // var date = ;
