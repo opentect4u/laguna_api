@@ -29,24 +29,39 @@ MenuRouter.get('/menu_data', async (req, res) => {
         Saturday: 7,
         Sunday: 8,
     };
-    // var breakfast_st = '08:00:00',
-    //     breakfast_end = '10:59:00',
-    //     lunch_st = '11:00:00',
-    //     lunch_end = '15:59:00',
-    //     dinner_st = '16:00:00',
-    //     dinner_end = '24:00:00';
+    var morning_st = '05:00:00',
+        morning_end = '11:59:59',
+        noon_st = '12:00:00',
+        noon_end = '17:59:59';
     var breakfast_st = '',
         breakfast_end = '',
         lunch_st = '',
         lunch_end = '',
         dinner_st = '',
-        dinner_end = '';
+        dinner_end = '',
+        brunch_st = '',
+        brunch_end = '';
+    var st_time = '';
+    var end_time = '';
+    var greet = '';
     var date = dateFormat(now, "dddd"),
-        menu_date = data[date];;
+        menu_date = data[date];
+
+    // GET USER TIMEZONE AND SET TIME AS LOCAL TIME ZONE //
+    var date_sql = `SELECT * FROM td_contacts WHERE id = "${res_id}"`;
+    var con_dt = await F_Select(date_sql);
+    var zone = con_dt.msg[0].time_zone;
+    // console.log({ zone });
+    let loc_time = zone != '' ? new Date().toLocaleString('en-US', { timeZone: zone }) : new Date();
+    let curr_time = dateFormat(loc_time, "HH:MM:ss");
+
+    // GET START TIME AND END TIME WITH CURRENT MONTH_DAY //
     let sql = `SELECT * FROM td_date_time WHERE restaurant_id = "${res_id}" AND month_day = "${menu_date}"`;
     // console.log(sql);
     var dt_data = await F_Select(sql);
     console.log(dt_data.msg);
+
+    // SET START TIME AND END TIME WITH MENU ID //
     for (let i = 0; i < dt_data.msg.length; i++) {
         if (dt_data.msg[i].menu_id == 1) {
             breakfast_st = dt_data.msg[i].start_time;
@@ -58,40 +73,35 @@ MenuRouter.get('/menu_data', async (req, res) => {
             dinner_st = dt_data.msg[i].start_time;
             dinner_end = dt_data.msg[i].end_time;
         } else if (dt_data.msg[i].menu_id == 4) {
-            special_st = dt_data.msg[i].start_time;
-            special_end = dt_data.msg[i].end_time;
+            brunch_st = dt_data.msg[i].start_time;
+            brunch_end = dt_data.msg[i].end_time;
         }
     }
 
-    var st_time = '';
-    var end_time = '';
-    var greet = '';
+    breakfast_st = breakfast_st;
+    breakfast_end = breakfast_end;
+    lunch_st = lunch_st ? lunch_st : (breakfast_end ? breakfast_end : curr_time);
+    lunch_end = lunch_end ? lunch_end : (dinner_st ? dinner_st : '');
+    dinner_st = dinner_st ? dinner_st : (lunch_end ? lunch_end : curr_time);
+    dinner_end = dinner_end;
+    brunch_st = brunch_st;
+    brunch_end = brunch_end;
+    //let curr_time = dateFormat(now, "HH:MM:ss");
 
-    var date_sql = `SELECT * FROM td_contacts WHERE id = "${res_id}"`
-    var con_dt = await F_Select(date_sql);
-    var zone = con_dt.msg[0].time_zone;
-    // console.log({ zone });
-    let loc_time = zone != '' ? new Date().toLocaleString('en-US', { timeZone: zone }) : new Date();
-    let curr_time = dateFormat(loc_time, "HH:MM:ss");
-    // console.log({ curr_time });
-
-    if (curr_time >= breakfast_st && curr_time < lunch_st) {
-        st_time = breakfast_st;
-        end_time = breakfast_end;
+    // CHECK CURRENT TIME WITH START TIME AND END TIME //
+    if (curr_time >= morning_st && curr_time <= morning_end) {
         greet = 'Good Morning';
-    } else if (curr_time >= lunch_st && curr_time < dinner_st) {
-        st_time = lunch_st;
-        end_time = lunch_end;
+    } else if (curr_time >= noon_st && curr_time < noon_end) {
         greet = 'Good Afternoon';
     } else {
-        st_time = dinner_st;
-        end_time = dinner_end;
         greet = 'Good Evening';
     }
 
-    var result = await MenuData(res_id, st_time, end_time, menu_id = 0, menu_date);
-    // console.log(result);
+    // FETCH RESULT FROM MENUMODEL.JS MENUDATA FUNCTION //
+    var result = await MenuData(res_id, st_time = curr_time, end_time = curr_time, menu_id = 0, menu_date, greet);
+    console.log(result);
     res.send(result);
+    //res.send({breakfast_st, breakfast_end, lunch_st, lunch_end, curr_time, dinner_st, dinner_end, greet})
 })
 
 MenuRouter.get('/check_menu', async (req, res) => {

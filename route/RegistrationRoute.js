@@ -1,4 +1,5 @@
 const express = require('express');
+const { OrderEmail, PayEmail } = require('../modules/EmailModule');
 const { F_Select } = require('../modules/MenuSetupModule');
 const { ResRegistration, EmailCheck, OrderSave, PaySave, MobileCheck } = require('../modules/RegisterModule');
 const RegRouter = express.Router();
@@ -45,6 +46,11 @@ RegRouter.get('/order_dtls', async (req, res) => {
     let sql = `SELECT * FROM td_order_items WHERE restaurant_id = ${req.query.id}`;
     var data = await F_Select(sql);
     res.send(data);
+})
+
+RegRouter.get('/pay_email', async (req, res) => {
+    var dt = await PayEmail(req.query.id, req.query.en_dt);
+    res.send({ suc: 1, msg: 'Email Sent' })
 })
 
 module.exports = { RegRouter };

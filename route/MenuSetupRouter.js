@@ -48,7 +48,7 @@ MenuSetRouter.get('/menu_setup', async (req, res) => {
 MenuSetRouter.get('/section_image', async (req, res) => {
     let res_id = req.query.id;
     let menu_id = req.query.menu_id;
-    let sql = `SELECT menu_id, sec_url, sec_img FROM td_section_image_request WHERE restaurant_id = "${res_id}" AND menu_id = "${menu_id}" ORDER BY id`;
+    let sql = `SELECT id, menu_id, sec_url, sec_img FROM td_section_image_request WHERE restaurant_id = "${res_id}" AND menu_id = "${menu_id}" ORDER BY id`;
     var data = await F_Select(sql);
     res.send(data);
 })
@@ -136,7 +136,7 @@ MenuSetRouter.get('/res_details', async (req, res) => {
     let sql = `SELECT a.*, c.setup_fee, c.monthly_fee, d.approval_flag FROM td_contacts a
                 LEFT JOIN td_order_items b ON a.id=b.restaurant_id
                 LEFT JOIN md_package c ON b.package_id=c.pakage_name
-                LEFT JOIN md_url d ON a.id=d.restaurant_id ${whr}`;
+                JOIN md_url d ON a.id=d.restaurant_id ${whr}`;
     var data = await F_Select(sql);
     res.send(data);
 })

@@ -88,7 +88,7 @@ const CheckMenu = (res_id, st_time, end_time) => {
     })
 }
 
-const MenuData = (res_id, st_time, end_time, menu_id, date) => {
+const MenuData = (res_id, st_time, end_time, menu_id, date, greet) => {
     var dat = {};
     var whr_menu = menu_id > 0 ? `AND a.menu_id = "${menu_id}"` : '';
     var whr_dt = date > 0 ? `AND e.month_day = "${date}"` : '';
@@ -122,7 +122,7 @@ const MenuData = (res_id, st_time, end_time, menu_id, date) => {
                 let cov_img = oth_data.msg.length > 0 ? oth_data.msg[0].cover_page_img : '',
                     top_img = oth_data.msg.length > 0 ? oth_data.msg[0].top_image_img : ''
                 // console.log(dat);
-                data = { suc: 1, msg: 'Success', res: dat, cov_img: cov_img, top_img: top_img, menu_check: menu_check.msg, len: sec_sql, dt: oth_data };
+                data = { suc: 1, msg: 'Success', res: dat, cov_img: cov_img, top_img: top_img, menu_check: menu_check.msg, len: sec_sql, dt: oth_data, greet: greet };
                 // let oth_sql = `SELECT * FROM td_other_image WHERE restaurant_id = "${res_id}" AND menu_id = "${result[0].menu_id}"`;
                 // let oth_data = await F_Select(oth_sql)
                 // let menu_check = await CheckMenu(res_id, st_time, end_time);

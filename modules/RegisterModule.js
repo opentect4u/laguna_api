@@ -2,10 +2,12 @@ const db = require('../core/db');
 const Buffer = require('buffer').Buffer;
 const dateFormat = require('dateformat');
 const bcrypt = require('bcrypt');
+const { OrderEmail } = require('./EmailModule')
 var data = '';
 
 const ResRegistration = (data) => {
     // console.log(data);
+    var res = '';
     var add2_fl = data.Address2 ? ',addr_line2' : '';
     var add2_vl = data.Address2 ? `,"${data.Address2}"` : '';
     var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
@@ -15,16 +17,16 @@ const ResRegistration = (data) => {
         db.query(sql, async (err, result) => {
             if (err) {
                 console.log(err);
-                data = { suc: 0, msg: JSON.stringify(err) };
+                res = { suc: 0, msg: JSON.stringify(err) };
             }
             else {
                 let str = result.insertId + '/' + data.Email;
                 let id_en = Buffer.from(str).toString('base64');
-                data = { suc: 1, msg: 'Successfully Inserted !!', id: id_en };
+                res = { suc: 1, msg: 'Successfully Inserted !!', id: id_en };
                 // SEND EMAIL TO USER ORDER PAGE AS URL //
                 var or_res = await OrderEmail(result.insertId, data.Email, data.Contact, id_en);
             }
-            resolve(data);
+            resolve(res);
         })
     })
 }
