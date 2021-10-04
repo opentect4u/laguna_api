@@ -24,7 +24,6 @@ const { MenuSetRouter } = require('./route/MenuSetupRouter');
 const { TestRouter } = require('./route/TestRoute');
 const { EmailRouter } = require('./route/EmailRouter');
 const { MenuRouter } = require('./route/MenuRouter');
-const { ImageSaveRouter } = require('./route/ImageSaveRouter');
 ///////////////////////////////////////////
 
 // REGISTRATION ROUTER RegistrationRouter.js FOLDER //
@@ -45,7 +44,6 @@ app.use(EmailRouter);
 
 app.use(MenuRouter);
 
-app.use(ImageSaveRouter);
 
 app.get('/', (req, res) => {
     // var date = ;
@@ -55,7 +53,7 @@ app.get('/', (req, res) => {
     const nDate = new Date().toLocaleString('en-US', {
         timeZone: 'Asia/Tokyo'
     });
-    console.log(nDate);
+    console.log(req.header.host);
     res.send('Success')
 })
 

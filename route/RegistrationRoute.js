@@ -41,4 +41,10 @@ RegRouter.get('/get_timezone', async (req, res) => {
     res.send(data);
 })
 
+RegRouter.get('/order_dtls', async (req, res) => {
+    let sql = `SELECT * FROM td_order_items WHERE restaurant_id = ${req.query.id}`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
 module.exports = { RegRouter };

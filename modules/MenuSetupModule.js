@@ -6,6 +6,8 @@ const QRCode = require("qrcode");
 const { createCanvas, loadImage } = require("canvas");
 const fs = require('fs');
 
+var api_url = 'https://lagunaapi.shoplocal-lagunabeach.com/';
+
 var storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, '../assets/files');
@@ -86,17 +88,20 @@ const OtherImageSave = async (data, menu_img) => {
     var sql = '';
     if (Array.isArray(menu_img)) {
         for (let i = 0; i < menu_img.length; i++) {
-            sql = `INSERT INTO td_menu_image (restaurant_id, menu_id, active_flag, menu_url, menu_img, created_by, created_dt) VALUES
+            let menu_data = await F_Select(`SELECT * FROM td_menu_image WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}" AND menu_img = "${menu_img[i].filename}"`);
+            if (menu_data.msg.length < 1) {
+                sql = `INSERT INTO td_menu_image (restaurant_id, menu_id, active_flag, menu_url, menu_img, created_by, created_dt) VALUES
             ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${data.MenuUrl}", "${menu_img[i].filename}", "${data.restaurant_id}", "${datetime}")`;
-            console.log({ arr_sql: sql });
-            db.query(sql, (err, lastId) => {
-                if (err) {
-                    console.log(err);
-                    res = false;
-                } else {
-                    res = true;
-                }
-            })
+                console.log({ arr_sql: sql });
+                db.query(sql, (err, lastId) => {
+                    if (err) {
+                        console.log(err);
+                        res = false;
+                    } else {
+                        res = true;
+                    }
+                })
+            }
         }
         //     sql = `UPDATE td_menu_image SET active_flag = "${data.break_check}", menu_url = "${data.MenuUrl}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
         // WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}"`;
@@ -200,17 +205,20 @@ const SectionImageSave = async (data, sec_img) => {
 
     if (Array.isArray(sec_img)) {
         for (let i = 0; i < sec_img.length; i++) {
-            sql = `INSERT INTO td_section_image_request (restaurant_id, menu_id, active_flag, sec_img, sec_url, created_by, created_dt) VALUES
+            let menu_data = await F_Select(`SELECT * FROM td_section_image_request WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}" AND sec_img = "${sec_img[i].filename}"`);
+            if (menu_data.msg.length < 1) {
+                sql = `INSERT INTO td_section_image_request (restaurant_id, menu_id, active_flag, sec_img, sec_url, created_by, created_dt) VALUES
         ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${sec_img[i].filename}", "${data.SectionUrl}", "${data.restaurant_id}", "${datetime}")`;
-            console.log({ arr_sql: sql });
-            db.query(sql, (err, lastId) => {
-                if (err) {
-                    console.log(err);
-                    res = false;
-                } else {
-                    res = true;
-                }
-            })
+                console.log({ arr_sql: sql });
+                db.query(sql, (err, lastId) => {
+                    if (err) {
+                        console.log(err);
+                        res = false;
+                    } else {
+                        res = true;
+                    }
+                })
+            }
         }
     } else {
         if (sec_img) {
@@ -535,7 +543,7 @@ const create = async (dataForQRcode, center_image, width, cwidth, data) => {
     );
 
     const ctx = canvas.getContext("2d");
-    const img = await loadImage(center_image);
+    const img = await loadImage(api_url + center_image);
     const center = (width - cwidth) / 2;
     let img_name = data.res_id + '_qr.png';
     let path = 'uploads/' + img_name;
@@ -571,7 +579,7 @@ const GenerateQr = async (data) => {
             } else {
                 data = { suc: 1, msg: 'Inserted Successfully !!' };
             }
-            console.log(data);
+            // console.log(data);
             resolve(data)
         })
     })
