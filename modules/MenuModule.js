@@ -65,7 +65,8 @@ const GetDataRes = (sec_id, res_id, st_time, end_time, menu_id, date) => {
 
 }
 
-const CheckMenu = (res_id, st_time, end_time, date) => {
+const CheckMenu = (res_id, st_time, end_time, date, menu_id) => {
+    let menu_whr = menu_id ? `AND a.menu_id = "${menu_id}"` : '';
     let whr = date ? `AND e.month_day = "${date}"` : '';
     var sql = `SELECT a.menu_id, d.menu_description, e.start_time, e.end_time
                 FROM md_item_description a, md_menu d, td_date_time e
@@ -73,7 +74,7 @@ const CheckMenu = (res_id, st_time, end_time, date) => {
                 AND a.menu_id=e.menu_id AND a.restaurant_id=e.restaurant_id
                 AND a.restaurant_id = "${res_id}"
                 AND e.start_time <= '${st_time}'
-                AND e.end_time >= '${end_time}' ${whr}
+                AND e.end_time >= '${end_time}' ${whr} ${menu_whr}
                 GROUP BY a.menu_id
                 ORDER BY a.menu_id`;
     return new Promise((resolve, reject) => {
@@ -119,7 +120,7 @@ const MenuData = (res_id, st_time, end_time, menu_id, date, greet) => {
                 console.log(dat);
                 let oth_sql = `SELECT * FROM td_other_image WHERE restaurant_id = "${res_id}" AND menu_id = "${menu_id}"`;
                 let oth_data = await F_Select(oth_sql)
-                let menu_check = await CheckMenu(res_id, st_time, end_time, date);
+                let menu_check = await CheckMenu(res_id, st_time, end_time, date, null);
                 let cov_img = oth_data.msg.length > 0 ? oth_data.msg[0].cover_page_img : '',
                     top_img = oth_data.msg.length > 0 ? oth_data.msg[0].top_image_img : ''
                 // console.log(dat);
