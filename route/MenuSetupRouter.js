@@ -29,17 +29,20 @@ MenuSetRouter.post('/notice', async (req, res) => {
 })
 
 MenuSetRouter.get('/menu_setup', async (req, res) => {
-    let id = req.query.id;
+    let id = req.query.id,
+        menu_id = req.query.menu_id;
+    let whr = menu_id ? `AND menu_id = "${menu_id}"` : '';
+    // console.log(whr);
     // let sql = `SELECT b.logo_url, a.menu_id, a.cover_page_url, a.top_img_url, a.active_flag, c.menu_url
     //     FROM td_other_image a
     //     left JOIN td_logo b ON a.restaurant_id = b.restaurant_id
     //     left JOIN td_menu_image c ON a.restaurant_id = c.restaurant_id
     //     WHERE a.restaurant_id = "${id}"`;
-    let oth_sql = `SELECT id, menu_id, active_flag, cover_page_img, cover_page_url, top_image_img, top_img_url FROM td_other_image WHERE restaurant_id = "${id}"`;
+    let oth_sql = `SELECT id, menu_id, active_flag, cover_page_img, cover_page_url, top_image_img, top_img_url FROM td_other_image WHERE restaurant_id = "${id}" ${whr}`;
     var oth_dt = await F_Select(oth_sql),
         logo_sql = `SELECT id, logo_url, logo_path FROM td_logo WHERE restaurant_id = "${id}"`,
         logo_dt = await F_Select(logo_sql),
-        menu_sql = `SELECT id, menu_id, active_flag, menu_url, menu_img FROM td_menu_image WHERE restaurant_id = "${id}"`,
+        menu_sql = `SELECT id, menu_id, active_flag, menu_url, menu_img FROM td_menu_image WHERE restaurant_id = "${id}" ${whr}`,
         menu_dt = await F_Select(menu_sql)
     var data = { suc: 1, oth_dt: oth_dt.msg, logo_dt: logo_dt.msg, menu_dt: menu_dt.msg };
     res.send(data);
