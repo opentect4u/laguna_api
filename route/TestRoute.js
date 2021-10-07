@@ -54,69 +54,95 @@ TestRouter.post('/testing', async (req, res) => {
     var cov_file_name = '',
         top_img_name = '',
         data = req.body;
-    if (req.body.cov_img != '' && req.body.cov_img != undefined) {
-        if (req.body.cov_img.length > 1000) {
-            var cov_buffer = req.body.cov_img;
-            // var dt = buffer.split(';');
-            // var ext = dt[0].split('/')[1];
-            cov_file_name = data.restaurant_id + '_cover_' + req.body.cov_filename;
+    var cov_file = req.files ? (req.files.cov_img ? req.files.cov_img : null) : null;
+    var top_file = req.files ? (req.files.top_img ? req.files.top_img : null) : null;
+    if (cov_file) {
+        var cov_file_name = data.restaurant_id + '_' + data.menu_id + '_cover_' + cov_file.name;
 
-            // console.log({cov_file_name, cov_filename: req.body.cov_filename});
-            var cov_buffer_dt = cov_buffer.replace(/^data:image\/png;base64,/, "");
-            cov_buffer_dt += cov_buffer_dt.replace('+', ' ');
-            let cov_binaer_dt = new Buffer(cov_buffer_dt, 'base64').toString('binary');
-            fs.writeFile("uploads/" + cov_file_name, cov_binaer_dt, "binary", async (err) => {
-                if (err) console.log(err);
-                // else {
-                //     await LogoSave(data, filename);
-                // }
-            });
-        } else {
-            cov_file_name = '';
-        }
-        // if(req.files){
-        //     if(req.files.)
-        // }
-
-        // cov_file_name = req.body.restaurant_id + '_' + req.body.menu_id + '_cover_' + req.files.cov_img.name;
-        // req.files.cov_img.mv('uploads/' + cov_file_name, async (err) => {
-        //     if (err) {
-        //         console.log(err);
-        //     } else {
-        //         console.log('Other Image Top Uploaded');
-        //     }
-        // })
+        cov_file.mv('Uploads/' + cov_file_name, async (err) => {
+            if (err) {
+                console.log(`${cov_file_name} not uploaded`);
+            } else {
+                console.log(`Successfully ${cov_file_name} uploaded`);
+                // await SectionImageSave(data, filename);
+            }
+        })
     }
-    if (req.body.top_img != '' && req.body.top_img != undefined) {
-        if (req.body.top_img.length > 1000) {
-            var top_buffer = req.body.top_img;
-            // var dt = buffer.split(';');
-            // var ext = dt[0].split('/')[1];
-            top_img_name = data.restaurant_id + '_top_' + req.body.top_filename;
+    if (top_file) {
+        var top_img_name = data.restaurant_id + '_' + data.menu_id + '_top_' + top_file.name;
 
-            // console.log({top_img_name, top_filename: req.body.top_filename});
-            var top_buffer_dt = top_buffer.replace(/^data:image\/png;base64,/, "");
-            top_buffer_dt += top_buffer_dt.replace('+', ' ');
-            let top_binaer_dt = new Buffer(top_buffer_dt, 'base64').toString('binary');
-            fs.writeFile("uploads/" + top_img_name, top_binaer_dt, "binary", async (err) => {
-                if (err) console.log(err);
-                // else {
-                //     await LogoSave(data, filename);
-                // }
-            });
-        } else {
-            top_img_name = '';
-        }
-        // top_img_name = req.body.restaurant_id + '_' + req.body.menu_id + '_top_' + req.files.top_img.name;
-        // req.files.top_img.mv('uploads/' + top_img_name, async (err) => {
-        //     if (err) {
-        //         console.log(err);
-        //     } else {
-        //         console.log('Other Image Top Uploaded');
-        //     }
-        // })
-
+        top_file.mv('Uploads/' + top_img_name, async (err) => {
+            if (err) {
+                console.log(`${top_img_name} not uploaded`);
+            } else {
+                console.log(`Successfully ${top_img_name} uploaded`);
+                // await SectionImageSave(data, filename);
+            }
+        })
     }
+    // if (req.body.cov_img != '' && req.body.cov_img != undefined) {
+    //     if (req.body.cov_img.length > 1000) {
+    //         var cov_buffer = req.body.cov_img;
+    //         // var dt = buffer.split(';');
+    //         // var ext = dt[0].split('/')[1];
+    //         cov_file_name = data.restaurant_id + '_cover_' + req.body.cov_filename;
+
+    //         // console.log({cov_file_name, cov_filename: req.body.cov_filename});
+    //         var cov_buffer_dt = cov_buffer.replace(/^data:image\/png;base64,/, "");
+    //         cov_buffer_dt += cov_buffer_dt.replace('+', ' ');
+    //         let cov_binaer_dt = new Buffer(cov_buffer_dt, 'base64').toString('binary');
+    //         fs.writeFile("uploads/" + cov_file_name, cov_binaer_dt, "binary", async (err) => {
+    //             if (err) console.log(err);
+    //             // else {
+    //             //     await LogoSave(data, filename);
+    //             // }
+    //         });
+    //     } else {
+    //         cov_file_name = '';
+    //     }
+    //     // if(req.files){
+    //     //     if(req.files.)
+    //     // }
+
+    //     // cov_file_name = req.body.restaurant_id + '_' + req.body.menu_id + '_cover_' + req.files.cov_img.name;
+    //     // req.files.cov_img.mv('uploads/' + cov_file_name, async (err) => {
+    //     //     if (err) {
+    //     //         console.log(err);
+    //     //     } else {
+    //     //         console.log('Other Image Top Uploaded');
+    //     //     }
+    //     // })
+    // }
+    // if (req.body.top_img != '' && req.body.top_img != undefined) {
+    //     if (req.body.top_img.length > 1000) {
+    //         var top_buffer = req.body.top_img;
+    //         // var dt = buffer.split(';');
+    //         // var ext = dt[0].split('/')[1];
+    //         top_img_name = data.restaurant_id + '_top_' + req.body.top_filename;
+
+    //         // console.log({top_img_name, top_filename: req.body.top_filename});
+    //         var top_buffer_dt = top_buffer.replace(/^data:image\/png;base64,/, "");
+    //         top_buffer_dt += top_buffer_dt.replace('+', ' ');
+    //         let top_binaer_dt = new Buffer(top_buffer_dt, 'base64').toString('binary');
+    //         fs.writeFile("uploads/" + top_img_name, top_binaer_dt, "binary", async (err) => {
+    //             if (err) console.log(err);
+    //             // else {
+    //             //     await LogoSave(data, filename);
+    //             // }
+    //         });
+    //     } else {
+    //         top_img_name = '';
+    //     }
+    //     // top_img_name = req.body.restaurant_id + '_' + req.body.menu_id + '_top_' + req.files.top_img.name;
+    //     // req.files.top_img.mv('uploads/' + top_img_name, async (err) => {
+    //     //     if (err) {
+    //     //         console.log(err);
+    //     //     } else {
+    //     //         console.log('Other Image Top Uploaded');
+    //     //     }
+    //     // })
+
+    // }
 
     var dt = await MenuImageSave(req.body, cov_file_name, top_img_name);
     var upload_menu = await UploadMenu(req.files ? (req.files.menu_img ? req.files.menu_img : null) : null, req.body);

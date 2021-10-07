@@ -139,7 +139,7 @@ MenuSetRouter.get('/res_details', async (req, res) => {
     let sql = `SELECT a.*, c.setup_fee, c.monthly_fee, d.approval_flag FROM td_contacts a
                 LEFT JOIN td_order_items b ON a.id=b.restaurant_id
                 LEFT JOIN md_package c ON b.package_id=c.pakage_name
-                JOIN md_url d ON a.id=d.restaurant_id ${whr}`;
+                LEFT JOIN md_url d ON a.id=d.restaurant_id ${whr}`;
     var data = await F_Select(sql);
     res.send(data);
 })

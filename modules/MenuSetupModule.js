@@ -459,7 +459,7 @@ const Check_Data = (db_name, whr) => {
 const SectionSave = (data, sec_img) => {
     var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
     var sql = '';
-    if (data.id) {
+    if (data.id > 0) {
         sql = `UPDATE md_section SET menu_id = "${data.menu_id}", section_name = "${data.sec_name}", section_img = "${sec_img}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
         WHERE id = "${data.id}"`;
     } else {
