@@ -80,74 +80,23 @@ TestRouter.post('/testing', async (req, res) => {
             }
         })
     }
-    // if (req.body.cov_img != '' && req.body.cov_img != undefined) {
-    //     if (req.body.cov_img.length > 1000) {
-    //         var cov_buffer = req.body.cov_img;
-    //         // var dt = buffer.split(';');
-    //         // var ext = dt[0].split('/')[1];
-    //         cov_file_name = data.restaurant_id + '_cover_' + req.body.cov_filename;
-
-    //         // console.log({cov_file_name, cov_filename: req.body.cov_filename});
-    //         var cov_buffer_dt = cov_buffer.replace(/^data:image\/png;base64,/, "");
-    //         cov_buffer_dt += cov_buffer_dt.replace('+', ' ');
-    //         let cov_binaer_dt = new Buffer(cov_buffer_dt, 'base64').toString('binary');
-    //         fs.writeFile("uploads/" + cov_file_name, cov_binaer_dt, "binary", async (err) => {
-    //             if (err) console.log(err);
-    //             // else {
-    //             //     await LogoSave(data, filename);
-    //             // }
-    //         });
-    //     } else {
-    //         cov_file_name = '';
-    //     }
-    //     // if(req.files){
-    //     //     if(req.files.)
-    //     // }
-
-    //     // cov_file_name = req.body.restaurant_id + '_' + req.body.menu_id + '_cover_' + req.files.cov_img.name;
-    //     // req.files.cov_img.mv('uploads/' + cov_file_name, async (err) => {
-    //     //     if (err) {
-    //     //         console.log(err);
-    //     //     } else {
-    //     //         console.log('Other Image Top Uploaded');
-    //     //     }
-    //     // })
-    // }
-    // if (req.body.top_img != '' && req.body.top_img != undefined) {
-    //     if (req.body.top_img.length > 1000) {
-    //         var top_buffer = req.body.top_img;
-    //         // var dt = buffer.split(';');
-    //         // var ext = dt[0].split('/')[1];
-    //         top_img_name = data.restaurant_id + '_top_' + req.body.top_filename;
-
-    //         // console.log({top_img_name, top_filename: req.body.top_filename});
-    //         var top_buffer_dt = top_buffer.replace(/^data:image\/png;base64,/, "");
-    //         top_buffer_dt += top_buffer_dt.replace('+', ' ');
-    //         let top_binaer_dt = new Buffer(top_buffer_dt, 'base64').toString('binary');
-    //         fs.writeFile("uploads/" + top_img_name, top_binaer_dt, "binary", async (err) => {
-    //             if (err) console.log(err);
-    //             // else {
-    //             //     await LogoSave(data, filename);
-    //             // }
-    //         });
-    //     } else {
-    //         top_img_name = '';
-    //     }
-    //     // top_img_name = req.body.restaurant_id + '_' + req.body.menu_id + '_top_' + req.files.top_img.name;
-    //     // req.files.top_img.mv('uploads/' + top_img_name, async (err) => {
-    //     //     if (err) {
-    //     //         console.log(err);
-    //     //     } else {
-    //     //         console.log('Other Image Top Uploaded');
-    //     //     }
-    //     // })
-
-    // }
 
     var dt = await MenuImageSave(req.body, cov_file_name, top_img_name);
-    var upload_menu = await UploadMenu(req.files ? (req.files.menu_img ? req.files.menu_img : null) : null, req.body);
-    var upload_sec = await UploadSection(req.files ? (req.files.section_img ? req.files.section_img : null) : null, req.body);
+    // var upload_menu = await UploadMenu(req.files ? (req.files.menu_img ? req.files.menu_img : null) : null, req.body);
+    // var upload_sec = await UploadSection(req.files ? (req.files.section_img ? req.files.section_img : null) : null, req.body);
     res.send({ suc: 1, msg: 'Success' });
+})
+
+TestRouter.post('/menu_file_testing', async (req, res) => {
+    var menu_img = req.files ? (req.files.menu_img ? req.files.menu_img : null) : null;
+    var upload_menu = await UploadMenu(menu_img, req.body)
+    res.send({ suc: 1, msg: "Menu Uploaded" });
+})
+
+TestRouter.post('/sec_file_testing', async (req, res) => {
+    var sec_img = req.files ? (req.files.section_img ? req.files.section_img : null) : null;
+    var upload_sec = await UploadSection(sec_img, req.body);
+    res.send({ suc: 1, msg: "Section Uploaded" });
 })
 
 const UploadSection = async (sec_img, data) => {
@@ -188,7 +137,9 @@ const UploadSection = async (sec_img, data) => {
             })
         }
     } else {
-        await SectionImageSave(data, file_path);
+        if (data.SectionUrl != '') {
+            await SectionImageSave(data, file_path);
+        }
     }
 }
 
@@ -234,7 +185,9 @@ const UploadMenu = async (menu_img, data) => {
 
     } else {
         // console.log("Null File Selected");
-        await OtherImageSave(data, file_path)
+        if (data.MenuUrl != '') {
+            await OtherImageSave(data, file_path)
+        }
     }
 }
 

@@ -482,7 +482,7 @@ const SectionSave = (data, sec_img) => {
 const ItemSave = (data) => {
     var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
     var sql = '';
-    if (data.id) {
+    if (data.id > 0) {
         sql = `UPDATE md_items SET menu_id = "${data.menu_id}", section_id = "${data.sec_id}", item_name = "${data.item_name}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
         WHERE id = "${data.id}"`;
     } else {
@@ -505,7 +505,7 @@ const ItemSave = (data) => {
 const ItemPriceSave = (data) => {
     var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
     var sql = '';
-    if (data.id) {
+    if (data.id > 0) {
         sql = `UPDATE md_item_description SET menu_id = "${data.menu_id}", section_id = "${data.sec_id}", item_id = "${data.item_id}", item_price = "${data.item_price}", 
         item_desc = "${data.item_desc}", item_note = "${data.item_note}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
         WHERE id = "${data.id}"`;
