@@ -41,8 +41,14 @@ AdmRouter.get('/update_approval', async (req, res) => {
 })
 
 AdmRouter.get('/res_menu', async (req, res) => {
+    let special_menu_id = 5;
     var sql = `SELECT a.menu_id, b.menu_description as menu_name, a.active_flag FROM td_other_image a, md_menu b WHERE a.menu_id=b.id AND a.restaurant_id = "${req.query.id}" AND a.active_flag="Y"`;
     var data = await F_Select(sql);
+    var special_sql = `SELECT IF(count(*) > 0, 'Y', 'N') AS special_flag FROM td_menu_image WHERE restaurant_id = "${req.query.id}" AND menu_id = "${special_menu_id}"`;
+    var special_data = await F_Select(special_sql);
+    var special_flag = special_data.msg[0].special_flag;
+    // console.log(special_data.msg[0].special_flag);
+    console.log(data.msg.push({ "menu_id": 5, "menu_name": "Special", "active_flag": special_flag }));
     res.send(data);
 })
 

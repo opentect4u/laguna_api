@@ -1,7 +1,7 @@
 const express = require('express');
 const upload = require('express-fileupload')
 const { F_Select } = require('../modules/MenuSetupModule');
-const { SaveStockImg, DeleteStockImg, SaveSpecialMenuImg } = require('../modules/SpecialModule');
+const { SaveStockImg, DeleteStockImg, SaveSpecialMenuImg, SpecialMonthDateSave, SaveSpecialCatImg } = require('../modules/SpecialModule');
 const SpecialRouter = express.Router();
 const fs = require('fs');
 
@@ -51,6 +51,13 @@ SpecialRouter.post('/stock_img', async (req, res) => {
 SpecialRouter.get('/del_stock_img', async (req, res) => {
     var id = req.query.id;
     var data = await DeleteStockImg(id);
+    res.send(data);
+})
+
+
+SpecialRouter.post('/special_date_time', async (req, res) => {
+    var data = await SpecialMonthDateSave(req.body);
+    var cat_img = await SaveSpecialCatImg(req.body);
     res.send(data);
 })
 

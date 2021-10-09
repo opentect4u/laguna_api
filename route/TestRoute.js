@@ -426,9 +426,9 @@ TestRouter.get('/del_sec', (req, res) => {
 
 TestRouter.post('/special_save', async (req, res) => {
     var upload_special_menu = await UploadSpecialMenu(req.files ? (req.files.special_img ? req.files.special_img : null) : null, req.body);
-    console.log(req.body);
-    var data = await SpecialMonthDateSave(res.body);
-    res.send('Success')
+    // console.log(req.body);
+    // var data = await SpecialMonthDateSave(res.body);
+    res.send({ suc: 1, msg: "Success" });
 })
 
 const UploadSpecialMenu = async (menu_img, data) => {

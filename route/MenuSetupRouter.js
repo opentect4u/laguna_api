@@ -59,9 +59,16 @@ MenuSetRouter.get('/section_image', async (req, res) => {
 MenuSetRouter.get('/date_time', async (req, res) => {
     let res_id = req.query.id;
     let menu_id = req.query.menu_id;
-    let sql = `SELECT restaurant_id, menu_id, month_day, start_time, end_time FROM td_date_time WHERE restaurant_id = "${res_id}" AND menu_id = "${menu_id}"`;
-    var data = await F_Select(sql);
-    console.log(data);
+    var data = '';
+    let sql = '';
+    if (menu_id != 5) {
+        sql = `SELECT restaurant_id, menu_id, month_day, start_time, end_time FROM td_date_time WHERE restaurant_id = "${res_id}" AND menu_id = "${menu_id}"`;
+        data = await F_Select(sql);
+    } else {
+        sql = `SELECT * FROM td_special_date_time WHERE restaurant_id = ${req.query.id}`;
+        data = await F_Select(sql);
+    }
+    // console.log(data);
     res.send(data);
 })
 

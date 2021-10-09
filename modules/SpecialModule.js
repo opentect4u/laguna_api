@@ -107,34 +107,94 @@ const SaveSpecialMenuImg = async (data, menu_img) => {
 }
 
 const SpecialMonthDateSave = async (data) => {
-
+    console.log(data);
     var sql = '',
         res = '';
+    var delete_dt = await DeleteEveryDay(data.restaurant_id, data.menu_id);
+
     var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
     var date_field = data.day_flag == 'E' ? 'month_day' : 'menu_date';
-    if (data.day_flag != 'E') {
-        sql = `INSERT INTO td_special_date_time (restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, ${date_field}, regular_menu_id, created_by, created_dt) VALUES
-    ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${data.regular_menu_flag}", "${data.day_flag}", "${data.menu_date}", "${data.reg_menu_id}", "${data.restaurant_id}", "${datetime}")`;
-    } else {
-        data.month_day.forEach(d => {
-            if (d.dt > 0) {
+    return new Promise((resolve, reject) => {
+        if (delete_dt) {
+            if (data.day_flag != 'E') {
                 data.reg_menu_id.forEach(dt => {
                     if (dt.menu_id > 0) {
-                        sql = `INSERT INTO td_special_date_time (restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, month_day, regular_menu_id, created_by, created_dt) VALUES
-                    ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${data.regular_menu_flag}", "${data.day_flag}", "${d.dt}", "${dt.menu_id}", "${data.restaurant_id}", "${datetime}")`;
+                        sql = `INSERT INTO td_special_date_time (restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, ${date_field}, regular_menu_id, created_by, created_dt) VALUES
+            ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${data.regular_menu_flag}", "${data.day_flag}", "${data.menu_date}", "${dt.menu_id}", "${data.restaurant_id}", "${datetime}")`;
+                        console.log(sql);
                         db.query(sql, (err, lastId) => {
                             if (err) {
                                 console.log(err);
-                                res = false;
+                                res = { suc: 0, msg: JSON.stringify(err) };
                             } else {
-                                res = true;
+                                res = { suc: 1, msg: "Success" };
+                            }
+                            resolve(res)
+                        })
+                    }
+                })
+            } else {
+                data.month_day.forEach(d => {
+                    if (d.dt > 0) {
+                        data.reg_menu_id.forEach(dt => {
+                            if (dt.menu_id > 0) {
+                                sql = `INSERT INTO td_special_date_time (restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, month_day, regular_menu_id, created_by, created_dt) VALUES
+                    ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${data.regular_menu_flag}", "${data.day_flag}", "${d.dt}", "${dt.menu_id}", "${data.restaurant_id}", "${datetime}")`;
+                                console.log({ menu: sql });
+                                db.query(sql, (err, lastId) => {
+                                    if (err) {
+                                        console.log(err);
+                                        res = { suc: 0, msg: JSON.stringify(err) };
+                                    } else {
+                                        res = { suc: 1, msg: "Success" };
+                                    }
+                                    resolve(res)
+                                })
                             }
                         })
                     }
                 })
-            }
-        })
 
+            }
+        } else {
+            res = { suc: 0, msg: "ERROR" };
+            resolve(res);
+        }
+
+    })
+
+}
+
+const DeleteEveryDay = (res_id, menu_id) => {
+    var res = false;
+    var sql = `DELETE FROM td_special_date_time WHERE restaurant_id = "${res_id}" AND menu_id = "${menu_id}"`;
+    console.log({ delete: sql });
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err, lastId) => {
+            if (err) {
+                console.log(err);
+                res = false;
+            } else {
+                console.log("Deleted Date-Time");
+                res = true;
+            }
+            resolve(res);
+        })
+    })
+}
+
+const SaveSpecialCatImg = async (data) => {
+    var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
+    var sql = '',
+        res = '';
+    var chk_sql = `SELECT count(id) chk_dt FROM td_special_data WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}"`;
+    var chk_dt = await F_Select(chk_sql);
+    if (chk_dt.msg[0].chk_dt > 0) {
+        sql = `UPDATE td_special_data SET img_catg = "${data.img_catg}", img_path = "${data.img_path}", 
+        modified_by = "${data.restaurant_id}", modified_dt = "${datetime}" WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}"`
+    } else {
+        sql = `INSERT INTO td_special_data (restaurant_id, menu_id, img_catg, img_path, created_by, created_dt) VALUES
+        ("${data.restaurant_id}", "${data.menu_id}", "${data.img_catg}", "${data.img_path}", "${data.restaurant_id}", "${datetime}")`
     }
     return new Promise((resolve, reject) => {
         db.query(sql, (err, lastId) => {
@@ -142,59 +202,11 @@ const SpecialMonthDateSave = async (data) => {
                 console.log(err);
                 res = { suc: 0, msg: JSON.stringify(err) };
             } else {
-                res = { suc: 1, msg: "Deleted Successfully !!" };
+                res = { suc: 1, msg: "Success" };
             }
             resolve(res)
         })
     })
-    // await DeleteSpecialDatetime(data);
-    // return new Promise(async (resolve, reject) => {
-    //     var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
-    //     var date_field = data.day_flag == 'E' ? 'month_day' : 'menu_date';
-    //     var date_val = data.day_flag == 'E' ? data.month_day : data.menu_date;
-    //     if (data.day_flag != 'E') {
-    //         var chk_dt = await Check_Data(db_name = 'td_special_date_time', whr = `WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}"`);
-    //         if (chk_dt > 1) {
-    //             sql = `INSERT INTO td_special_date_time (restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, ${date_field}, regular_menu_id, created_by, created_dt) VALUES
-    //             ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${data.regular_menu_flag}", "${data.day_flag}", "${d.dt}", "${data.reg_menu_id}", "${data.restaurant_id}", "${datetime}")`;
-    //         } else {
-    //             sql = `UPDATE td_special_date_time SET active_flag = "${data.break_check}", regular_menu_flag = "${data.regular_menu_flag}", day_flag = "${data.day_flag}",
-    //             ${date_field} = "${data.menu_date}", regular_menu_id = "${data.reg_menu_id}", created_by = "${data.restaurant_id}", created_dt = "${datetime}"
-    //             WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}" AND month_day = "${d.dt}"`;
-    //         }
-    //         db.query(sql, (err, lastId) => {
-    //             if (err) {
-    //                 console.log(err);
-    //                 res = false;
-    //             } else {
-    //                 res = true;
-    //             }
-    //         })
-    //     } else {
-    //         data.month_day.forEach(async d => {
-    //             if (d.dt > 0) {
-    //                 var chk_dt = await Check_Data(db_name = 'td_special_date_time', whr = `WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}" AND month_day = "${d.dt}"`);
-    //                 if (chk_dt > 1) {
-    //                     sql = `INSERT INTO td_special_date_time (restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, month_day, regular_menu_id, created_by, created_dt) VALUES
-    //                 ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${data.regular_menu_flag}", "${data.day_flag}", "${d.dt}", "${data.reg_menu_id}", "${data.restaurant_id}", "${datetime}")`;
-    //                 } else {
-    //                     sql = `UPDATE td_special_date_time SET active_flag = "${data.break_check}", regular_menu_flag = "${data.regular_menu_flag}", day_flag = "${data.day_flag}",
-    //                     month_day = "${d.dt}", regular_menu_id = "${data.reg_menu_id}", created_by = "${data.restaurant_id}", created_dt = "${datetime}"
-    //                     WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}" AND month_day = "${d.dt}"`;
-    //                 }
-    //                 db.query(sql, (err, lastId) => {
-    //                     if (err) {
-    //                         console.log(err);
-    //                         res = false;
-    //                     } else {
-    //                         res = true;
-    //                     }
-    //                 })
-    //             }
-    //         })
-    //     }
-    //     resolve(res);
-    // })
 }
 
 const DeleteSpecialDatetime = (data) => {
@@ -220,4 +232,4 @@ const DeleteSpecialDatetime = (data) => {
     })
 }
 
-module.exports = { SaveStockImg, DeleteStockImg, SaveSpecialMenuImg, SpecialMonthDateSave };
+module.exports = { SaveStockImg, DeleteStockImg, SaveSpecialMenuImg, SpecialMonthDateSave, SaveSpecialCatImg };
