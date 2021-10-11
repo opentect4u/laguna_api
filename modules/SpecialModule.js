@@ -36,7 +36,7 @@ const DeleteStockImg = (id) => {
 }
 
 const SaveSpecialMenuImg = async (data, menu_img) => {
-    console.log({ menu_img, t: Array.isArray(menu_img) });
+    // console.log({ menu_img, t: Array.isArray(menu_img) });
     var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
     var sql = '';
     if (Array.isArray(menu_img)) {
@@ -119,8 +119,8 @@ const SpecialMonthDateSave = async (data) => {
             if (data.day_flag != 'E') {
                 data.reg_menu_id.forEach(dt => {
                     if (dt.menu_id > 0) {
-                        sql = `INSERT INTO td_special_date_time (restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, ${date_field}, regular_menu_id, created_by, created_dt) VALUES
-            ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${data.regular_menu_flag}", "${data.day_flag}", "${data.menu_date}", "${dt.menu_id}", "${data.restaurant_id}", "${datetime}")`;
+                        sql = `INSERT INTO td_special_date_time (restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, ${date_field}, regular_menu_id, start_time, end_time, created_by, created_dt) VALUES
+            ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${data.regular_menu_flag}", "${data.day_flag}", "${data.menu_date}", "${dt.menu_id}", "${data.start_time}", "${data.end_time}", "${data.restaurant_id}", "${datetime}")`;
                         console.log(sql);
                         db.query(sql, (err, lastId) => {
                             if (err) {
@@ -138,8 +138,8 @@ const SpecialMonthDateSave = async (data) => {
                     if (d.dt > 0) {
                         data.reg_menu_id.forEach(dt => {
                             if (dt.menu_id > 0) {
-                                sql = `INSERT INTO td_special_date_time (restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, month_day, regular_menu_id, created_by, created_dt) VALUES
-                    ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${data.regular_menu_flag}", "${data.day_flag}", "${d.dt}", "${dt.menu_id}", "${data.restaurant_id}", "${datetime}")`;
+                                sql = `INSERT INTO td_special_date_time (restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, month_day, regular_menu_id, start_time, end_time, created_by, created_dt) VALUES
+                    ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${data.regular_menu_flag}", "${data.day_flag}", "${d.dt}", "${dt.menu_id}", "${data.start_time}", "${data.end_time}", "${data.restaurant_id}", "${datetime}")`;
                                 console.log({ menu: sql });
                                 db.query(sql, (err, lastId) => {
                                     if (err) {
@@ -186,15 +186,17 @@ const DeleteEveryDay = (res_id, menu_id) => {
 const SaveSpecialCatImg = async (data) => {
     var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
     var sql = '',
-        res = '';
+        res = '',
+        in_desc_val = data.menu_desc ? data.menu_desc : null,
+        up_desc = data.menu_desc ? `, menu_desc = "${data.menu_desc}"` : '';
     var chk_sql = `SELECT count(id) chk_dt FROM td_special_data WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}"`;
     var chk_dt = await F_Select(chk_sql);
     if (chk_dt.msg[0].chk_dt > 0) {
-        sql = `UPDATE td_special_data SET img_catg = "${data.img_catg}", img_path = "${data.img_path}", 
+        sql = `UPDATE td_special_data SET img_catg = "${data.img_catg}", img_path = "${data.img_path}" ${up_desc}, 
         modified_by = "${data.restaurant_id}", modified_dt = "${datetime}" WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}"`
     } else {
-        sql = `INSERT INTO td_special_data (restaurant_id, menu_id, img_catg, img_path, created_by, created_dt) VALUES
-        ("${data.restaurant_id}", "${data.menu_id}", "${data.img_catg}", "${data.img_path}", "${data.restaurant_id}", "${datetime}")`
+        sql = `INSERT INTO td_special_data (restaurant_id, menu_id, menu_desc, img_catg, img_path, created_by, created_dt) VALUES
+        ("${data.restaurant_id}", "${data.menu_id}", "${in_desc_val}", "${data.img_catg}", "${data.img_path}", "${data.restaurant_id}", "${datetime}")`
     }
     return new Promise((resolve, reject) => {
         db.query(sql, (err, lastId) => {

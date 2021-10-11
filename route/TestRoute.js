@@ -59,7 +59,7 @@ TestRouter.post('/testing', async (req, res) => {
     if (cov_file) {
         var cov_file_name = data.restaurant_id + '_' + data.menu_id + '_cover_' + cov_file.name;
 
-        cov_file.mv('Uploads/' + cov_file_name, async (err) => {
+        cov_file.mv('uploads/' + cov_file_name, async (err) => {
             if (err) {
                 console.log(`${cov_file_name} not uploaded`);
             } else {
@@ -71,7 +71,7 @@ TestRouter.post('/testing', async (req, res) => {
     if (top_file) {
         var top_img_name = data.restaurant_id + '_' + data.menu_id + '_top_' + top_file.name;
 
-        top_file.mv('Uploads/' + top_img_name, async (err) => {
+        top_file.mv('uploads/' + top_img_name, async (err) => {
             if (err) {
                 console.log(`${top_img_name} not uploaded`);
             } else {
@@ -127,7 +127,7 @@ const UploadSection = async (sec_img, data) => {
         } else {
             var filename = data.restaurant_id + '_' + data.menu_id + '_section_' + sec_file.name;
 
-            sec_file.mv('Uploads/' + filename, async (err) => {
+            sec_file.mv('uploads/' + filename, async (err) => {
                 if (err) {
                     console.log(`${filename} not uploaded`);
                 } else {
@@ -173,7 +173,7 @@ const UploadMenu = async (menu_img, data) => {
             // console.log({ else: Array.isArray(file_path) });
             var filename = data.restaurant_id + '_' + data.menu_id + '_menu_' + sec_file.name;
 
-            sec_file.mv('Uploads/' + filename, async (err) => {
+            sec_file.mv('uploads/' + filename, async (err) => {
                 if (err) {
                     console.log(`${filename} not uploaded`);
                 } else {

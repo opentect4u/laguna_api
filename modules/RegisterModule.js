@@ -2,7 +2,8 @@ const db = require('../core/db');
 const Buffer = require('buffer').Buffer;
 const dateFormat = require('dateformat');
 const bcrypt = require('bcrypt');
-const { OrderEmail } = require('./EmailModule')
+const { OrderEmail } = require('./EmailModule');
+const { F_Select } = require('./MenuSetupModule');
 var data = '';
 
 const ResRegistration = (data) => {
@@ -69,7 +70,7 @@ const MobileCheck = (mob_no) => {
     })
 }
 
-const OrderSave = (data) => {
+const OrderSave = async (data) => {
     // var table_top = [{
     //     id: '6',
     //     qty: data.tabletop
@@ -90,10 +91,19 @@ const OrderSave = (data) => {
     var tabletop = data.tabletop > 0 ? data.tabletop : 0,
         wall_mount1 = data.wall_mount1 > 0 ? data.wall_mount1 : 0,
         wall_mount2 = data.wall_mount2 > 0 ? data.wall_mount2 : 0,
-        window = data.window > 0 ? data.window : 0;
+        window = data.window > 0 ? data.window : 0,
+        sql = '';
     // console.log({ table_top, window_cling, st: str.split('/')[0] });
-    var sql = `INSERT INTO td_order_items (restaurant_id, package_id, birth_calendar_flag, event_calendar, table_top_6, table_top_7, table_top_8, window_cling_9, created_by, created_dt) VALUES
+    var chk_sql = `SELECT COUNT(*) as cunt_dt FROM td_order_items WHERE restaurant_id = "${de_id[0]}"`;
+    var chk_dt = await F_Select(chk_sql);
+    if (chk_dt.msg[0].cunt_dt > 0) {
+        sql = `UPDATE td_order_items SET package_id = "${data.package}", birth_calendar_flag = "${data.birthday}", event_calendar = "${data.event}", table_top_6 = '${tabletop}',
+        table_top_7 = '${wall_mount1}', table_top_8 = "${wall_mount2}", window_cling_9 = "${window}", modified_by = "${de_id[1]}", modified_dt = "${datetime}" WHERE restaurant_id = "${de_id[0]}"`;
+    } else {
+        sql = `INSERT INTO td_order_items (restaurant_id, package_id, birth_calendar_flag, event_calendar, table_top_6, table_top_7, table_top_8, window_cling_9, created_by, created_dt) VALUES
     ("${de_id[0]}", "${data.package}", "${data.birthday}", "${data.event}", '${tabletop}', '${wall_mount1}', "${wall_mount2}", "${window}", "${de_id[1]}", "${datetime}")`;
+    }
+
     return new Promise((resolve, reject) => {
         db.query(sql, (err, result) => {
             if (err) {

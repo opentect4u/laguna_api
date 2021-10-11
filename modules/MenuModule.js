@@ -90,8 +90,10 @@ const CheckMenu = (res_id, st_time, end_time, date, menu_id) => {
     })
 }
 
-const MenuData = (res_id, st_time, end_time, menu_id, date, greet) => {
-    var dat = {};
+const MenuData = (res_id, st_time, end_time, menu_id, date, greet, menu_active_flag, replace_menu_id, reg_menu_flag) => {
+    var dat = {},
+        sp_menu_sql = '',
+        sp_menu = '';
     var whr_menu = menu_id > 0 ? `AND a.menu_id = "${menu_id}"` : '';
     var whr_dt = date > 0 ? `AND e.month_day = "${date}"` : '';
     let sec_sql = `SELECT a.id, a.menu_id, a.section_id, c.section_img, c.restaurant_id, c.section_name, e.start_time, e.end_time
@@ -122,15 +124,16 @@ const MenuData = (res_id, st_time, end_time, menu_id, date, greet) => {
                 let oth_data = await F_Select(oth_sql)
                 let menu_check = await CheckMenu(res_id, st_time, end_time, date, null);
                 let cov_img = oth_data.msg.length > 0 ? oth_data.msg[0].cover_page_img : '',
-                    top_img = oth_data.msg.length > 0 ? oth_data.msg[0].top_image_img : ''
+                    top_img = oth_data.msg.length > 0 ? oth_data.msg[0].top_image_img : '';
+                if (menu_active_flag != 'N') {
+                    sp_menu_sql = `SELECT a.*, b.name as cat_name FROM td_special_data a, md_special_category b WHERE a.img_catg=b.id AND a.restaurant_id = "${res_id}" AND a.menu_id = 5`;
+                    let sp_menu_dt = await F_Select(sp_menu_sql);
+                    sp_menu = sp_menu_dt.msg[0];
+                } else {
+                    sp_menu = '';
+                }
                 // console.log(dat);
-                data = { suc: 1, msg: 'Success', res: dat, cov_img: cov_img, top_img: top_img, menu_check: menu_check.msg, len: sec_sql, dt: oth_data, greet: greet };
-                // let oth_sql = `SELECT * FROM td_other_image WHERE restaurant_id = "${res_id}" AND menu_id = "${result[0].menu_id}"`;
-                // let oth_data = await F_Select(oth_sql)
-                // let menu_check = await CheckMenu(res_id, st_time, end_time);
-                // // console.log(dat);
-                // data = { suc: 1, msg: 'Success', res: dat, cov_img: oth_data.msg[0].cover_page_img, top_img: oth_data.msg[0].top_image_img, menu_check: menu_check };
-                // console.log({ dat });
+                data = { suc: 1, msg: 'Success', res: dat, cov_img: cov_img, top_img: top_img, menu_check: menu_check.msg, len: sec_sql, dt: oth_data, greet: greet, menu_active_flag, reg_menu_flag, sp_menu: sp_menu };
             }
             // console.log(dat);
             resolve(data)

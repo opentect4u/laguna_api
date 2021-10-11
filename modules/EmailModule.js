@@ -409,7 +409,7 @@ const PayEmail = async (res_id, en_data) => {
                 + email_name + '<br>'
                 + pro_name + '</p>'
                 + '<p style="font-family:Arial, Helvetica, sans-serif; padding-top:20px; padding-bottom:20px; margin:0;">'
-                + '<a href="' + client_url + 'pay/' + en_data + '" style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: 600;'
+                + '<a href="' + client_url + 'payment/' + en_data + '" style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: 600;'
                 + 'padding: 8px 15px; margin: 0; background: #3fb048; text-decoration: none; color: #fff; border-radius: 34px; width: 100%; display: inline-block; text-align: center; box-sizing: border-box;">Pay Now</a>'
                 + '</p></td>'
                 + '</tr>'

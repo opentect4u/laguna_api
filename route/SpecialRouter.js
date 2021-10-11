@@ -56,9 +56,62 @@ SpecialRouter.get('/del_stock_img', async (req, res) => {
 
 
 SpecialRouter.post('/special_date_time', async (req, res) => {
-    var data = await SpecialMonthDateSave(req.body);
-    var cat_img = await SaveSpecialCatImg(req.body);
+    var data = await SpecialMonthDateSave(req.body[0]);
+    var cat_img = await SaveSpecialCatImg(req.body[0]);
     res.send(data);
+})
+
+SpecialRouter.get('/get_special_data', async (req, res) => {
+    var res_id = req.query.id,
+        menu_id = req.query.menu_id;
+    var sql = `SELECT a.*, b.name as cat_name FROM td_special_data a, md_special_category b WHERE a.img_catg = b.id AND a.restaurant_id = "${res_id}" AND a.menu_id = "${menu_id}"`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
+SpecialRouter.post('/get_special_data', async (req, res) => {
+    var data = await SaveSpecialCatImg(req.body);
+    res.send(data);
+})
+
+SpecialRouter.get('/check_menu_special', async (req, res) => {
+    let res_id = req.query.id,
+        menu_id = req.query.menu_id,
+        msg = '';
+    var sql = `SELECT COUNT(*) as cnt FROM td_date_time WHERE restaurant_id = "${res_id}" AND menu_id = "${menu_id}"`;
+    console.log(sql);
+    var data = await F_Select(sql);
+    if (data.msg[0].cnt > 0) {
+        msg = { suc: 1, msg: "Menu Exist" };
+    } else {
+        msg = { suc: 2, msg: "Menu Not Exist" };
+    }
+    res.send(msg);
+})
+
+SpecialRouter.post('/special_start_end', async (req, res) => {
+    var data = req.body[0],
+        result = '';
+    var res_id = data.restaurant_id;
+    var v = '',
+        v1 = '';
+    for (let i = 0; i < data.reg_menu_id.length; i++) {
+        if (data.reg_menu_id[i].menu_id > 0) {
+            v = data.reg_menu_id[i].menu_id;
+            if (v1 != '') {
+                v1 = v + ',' + v1;
+            } else {
+                v1 = v;
+            }
+        }
+    }
+    if (v1 != '') {
+        let sql = `SELECT MIN(start_time) as start_time, MAX(end_time) as end_time FROM td_date_time WHERE restaurant_id = "${res_id}" AND menu_id IN(${v1})`;
+        result = await F_Select(sql);
+    } else {
+        result = { suc: 0, msg: "No data found" };
+    }
+    res.send(result);
 })
 
 module.exports = { SpecialRouter };

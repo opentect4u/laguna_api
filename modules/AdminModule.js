@@ -27,7 +27,7 @@ const PackageSave = async (data) => {
     if (check > 1) {
         sql = `INSERT INTO md_package (pakage_name, no_of_menu, special_menu, setup_fee, monthly_fee, created_by, created_dt) VALUES ("${data.Serial_no}", "${data.Menu_number}", "${data.Special_Menu}", "${data.SetUp_Fee}", "${data.Monthly_Fee}", "${user}", "${datetime}")`;
     } else {
-        sql = `UPDATE md_package SET no_of_menu= "${data.Serial_no}", special_menu= "${data.Special_Menu}", setup_fee= "${data.SetUp_Fee}", monthly_fee= "${data.Monthly_Fee}", modified_by= "${user}", modified_dt= "${datetime}" WHERE pakage_name = ${data.Serial_no}`;
+        sql = `UPDATE md_package SET no_of_menu= "${data.Menu_number}", special_menu= "${data.Special_Menu}", setup_fee= "${data.SetUp_Fee}", monthly_fee= "${data.Monthly_Fee}", modified_by= "${user}", modified_dt= "${datetime}" WHERE pakage_name = ${data.Serial_no}`;
     }
     return new Promise((resolve, reject) => {
         db.query(sql, (err, result) => {
@@ -102,12 +102,14 @@ const PromoSave = async (data) => {
 const HolderClingSave = async (data) => {
     var check = await CheckData(data, tb_name = 'md_holder_cling');
     var sql = '';
-    var user = 'admin@gmail.com';
+    var user = 'admin@gmail.com',
+        free_flag = data.per_Holder_Price > 0 ? 'N' : 'Y',
+        price = data.per_Holder_Price > 0 ? data.per_Holder_Price : 0;
     var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
     if (check > 1) {
-        sql = `INSERT INTO md_holder_cling (id, free_flag, price, created_by, created_dt) VALUES ("${data.serial_no}", "${data.free_flag}", "${data.per_Holder_Price}", "${user}", "${datetime}")`;
+        sql = `INSERT INTO md_holder_cling (id, free_flag, price, created_by, created_dt) VALUES ("${data.serial_no}", "${free_flag}", "${price}", "${user}", "${datetime}")`;
     } else {
-        sql = `UPDATE md_holder_cling SET free_flag= "${data.free_flag}", price= "${data.per_Holder_Price}", modified_by= "${user}", modified_dt= "${datetime}" WHERE id = ${data.serial_no}`;
+        sql = `UPDATE md_holder_cling SET free_flag= "${free_flag}", price= "${price}", modified_by= "${user}", modified_dt= "${datetime}" WHERE id = ${data.serial_no}`;
     }
     return new Promise((resolve, reject) => {
         db.query(sql, (err, lastId) => {
