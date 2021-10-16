@@ -2,7 +2,7 @@ const db = require('../core/db');
 const Buffer = require('buffer').Buffer;
 const dateFormat = require('dateformat');
 const bcrypt = require('bcrypt');
-const { OrderEmail } = require('./EmailModule');
+const { OrderEmail, UserCredential } = require('./EmailModule');
 const { F_Select } = require('./MenuSetupModule');
 var data = '';
 
@@ -139,9 +139,21 @@ const UpdateOrder = (data) => {
 const PaySave = async (data) => {
     var str = Buffer.from(data.res_id, 'base64').toString('ascii');
     var de_id = str.split('/');
-    var pwd = bcrypt.hashSync('123', 10);
+    var alpha = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+        'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+        'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+    var a = alpha[Math.floor(Math.random() * 62)];
+    var b = alpha[Math.floor(Math.random() * 62)];
+    var c = alpha[Math.floor(Math.random() * 62)];
+    var d = alpha[Math.floor(Math.random() * 62)];
+    var e = alpha[Math.floor(Math.random() * 62)];
+    var sum = a + b + c + d + e;
+    var pwd = bcrypt.hashSync(sum, 10);
     var dt = '';
     await SaveUrl(de_id[0], data);
+    await UserCredential(de_id[0], sum);
     return new Promise(async (resolve, reject) => {
         if (await UpdateOrder(data)) {
             var sql = `INSERT INTO td_users (restaurant_id, email_id, pwd, active_flag) VALUES ("${de_id[0]}", "${de_id[1]}", "${pwd}", "Y")`;

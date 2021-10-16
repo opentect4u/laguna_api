@@ -57,7 +57,9 @@ SpecialRouter.get('/del_stock_img', async (req, res) => {
 
 SpecialRouter.post('/special_date_time', async (req, res) => {
     var data = await SpecialMonthDateSave(req.body[0]);
-    var cat_img = await SaveSpecialCatImg(req.body[0]);
+    if (req.body[0].img_catg && req.body[0].img_path) {
+        var cat_img = await SaveSpecialCatImg(req.body[0]);
+    }
     res.send(data);
 })
 

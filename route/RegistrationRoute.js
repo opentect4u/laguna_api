@@ -53,4 +53,11 @@ RegRouter.get('/pay_email', async (req, res) => {
     res.send({ suc: 1, msg: 'Email Sent' })
 })
 
+RegRouter.get('/pay_check', async (req, res) => {
+    let res_id = req.query.id;
+    let sql = `SELECT IF(payment_flag = 'Y', 1, 0) as pay_flag FROM td_order_items WHERE restaurant_id = ${res_id}`;
+    var dt = await F_Select(sql);
+    res.send(dt);
+})
+
 module.exports = { RegRouter };

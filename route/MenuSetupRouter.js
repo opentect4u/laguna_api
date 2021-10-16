@@ -151,6 +151,17 @@ MenuSetRouter.get('/res_details', async (req, res) => {
     res.send(data);
 })
 
+MenuSetRouter.get('/res_dtls', async (req, res) => {
+    var res_id = req.query.id;
+    let whr = res_id > 0 ? `WHERE a.id = "${res_id}"` : '';
+    let sql = `SELECT a.*, c.setup_fee, c.monthly_fee, d.approval_flag FROM td_contacts a
+                JOIN td_order_items b ON a.id=b.restaurant_id
+                JOIN md_package c ON b.package_id=c.pakage_name
+                JOIN md_url d ON a.id=d.restaurant_id ${whr}`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
 MenuSetRouter.get('/get_url', async (req, res) => {
     var res_id = req.query.id;
     let sql = `SELECT * FROM md_url WHERE restaurant_id = "${res_id}"`;

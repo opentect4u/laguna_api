@@ -23,7 +23,8 @@ MenuRouter.get('/menu_data', async (req, res) => {
         replace_menu_id = 0,
         st_time = '',
         end_time = '',
-        reg_menu_flag = '';
+        reg_menu_flag = '',
+        sql = '';
     var now = new Date();
     var data = {
         Monday: 2,
@@ -85,7 +86,7 @@ MenuRouter.get('/menu_data', async (req, res) => {
             }
         } else {
             sql = `SELECT id, restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, month_day, menu_date, group_concat(DISTINCT regular_menu_id separator ',') as regular_menu_id, start_time, end_time
-            FROM td_special_date_time WHERE restaurant_id = ${res_id} AND menu_date = ${now_date}`;
+            FROM td_special_date_time WHERE restaurant_id = ${res_id} AND menu_date = "${now_date}"`;
             sql_dt = await F_Select(sql);
             if (sql_dt.msg.length > 0) {
                 st_time = sql_dt.msg[0].start_time;
@@ -108,13 +109,13 @@ MenuRouter.get('/menu_data', async (req, res) => {
             }
         }
     }
-    console.log({ menu_active_flag, replace_menu_id, reg_menu_flag });
+    // console.log({ menu_active_flag, replace_menu_id, reg_menu_flag });
 
     // GET START TIME AND END TIME WITH CURRENT MONTH_DAY //
-    let sql = `SELECT * FROM td_date_time WHERE restaurant_id = "${res_id}" AND month_day = "${menu_date}"`;
+    // let dt_sql = `SELECT * FROM td_date_time WHERE restaurant_id = "${res_id}" AND month_day = "${menu_date}"`;
     // console.log(sql);
-    var dt_data = await F_Select(sql);
-    console.log(dt_data.msg);
+    // var dt_data = await F_Select(dt_sql);
+    // console.log(dt_data.msg);
 
     // SET START TIME AND END TIME WITH MENU ID //
     // for (let i = 0; i < dt_data.msg.length; i++) {

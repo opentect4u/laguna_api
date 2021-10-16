@@ -432,4 +432,94 @@ const PayEmail = async (res_id, en_data) => {
     })
 }
 
-module.exports = { ConfirmMenu, ApproveMenu, OrderEmail, PayEmail };
+const UserCredential = async (res_id, password) => {
+    let con_sql = `SELECT * FROM td_contacts WHERE id = "${res_id}"`;
+    let con = await F_Select(con_sql);
+    let parm_sql = `SELECT * FROM md_parm_value`;
+    let param = await F_Select(parm_sql);
+    var contact_name = con.msg[0].contact_name,
+        email_id = con.msg[0].email,
+        pro_name = param.msg[0].param_value,
+        email_name = param.msg[1].param_value;
+    return new Promise(async (resolve, reject) => {
+        // FOR LOCAL
+        // var transporter = nodemailer.createTransport({
+        //     service: 'gmail',
+        //     auth: {
+        //         user: 'synergicbbps@gmail.com',
+        //         pass: 'Signature@123'
+        //     }
+        // });
+
+        // FOR SERVER
+        var transporter = nodemailer.createTransport({
+            //pool: true,
+            host: 'webmail.shoplocal-lagunabeach.com',
+            port: 25,
+            secure: false,
+            auth: {
+                user: 'admin@shoplocal-lagunabeach.com',
+                pass: 'dY786#lw!Laguna'
+            },
+            tls: {
+                // do not fail on invalid certs
+                rejectUnauthorized: false
+            }
+        });
+
+        var mailOptions = {
+            from: 'admin@shoplocal-lagunabeach.com',
+            to: email_id,
+            subject: 'Shoplocal User Credential',
+            html: '<!DOCTYPE html>'
+                + '<html>'
+                + '<head>'
+                + '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />'
+                + '<title>ShopLocal</title>'
+                + '<style type="text/css">'
+                + 'body{margin:0; padding:0; font-family:14px; font-family:Arial, Helvetica, sans-serif;}'
+                + '</style>'
+                + '</head>'
+                + '<body>'
+                + '<div class="sectionArea" style="max-width:750px; width:100%; margin:2% auto 2% auto; padding:15px; background:#faf9f9; border-radius:15px;border: #ececec solid 1px;">'
+                + '<table width="100%" border="0" cellspacing="0" cellpadding="0">'
+                + '<tr>'
+                + '<td align="left" valign="top" class="logoArea" style="padding:0 0 25px 0; text-align:center;"><img src="https://eporiseva.com/sll_logo.png" width="402" height="300" alt="" style="max-width:190px; width:100%; height:auto; margin:0 auto;"></td>'
+                + '</tr>'
+                + '<tr>'
+                + '<td align="left" valign="top">'
+                + '<h2 style="font-size:18px; font-weight:700; font-family:Arial, Helvetica, sans-serif;">Hi ' + contact_name + ',</h2>'
+                + '<h2 style="font-size:18px; font-weight:700; font-family:Arial, Helvetica, sans-serif;">Congratulations</h2>'
+                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">We are happy to have you as a part of the Shop Local Laguna family!</p>'
+                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">Your payment has been done successfully.</p>'
+                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">Your login credentials are as follow</p>'
+                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;"><b>UserName:</b> ' + email_id + '<br><b>Password:</b> ' + password + '</p>'
+                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">Please click on the link bellow to login.</p>'
+                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:19px; padding-bottom:15px; margin:0;"><strong>Your Sincerely</strong>,<br>'
+                + email_name + '<br>'
+                + pro_name + '</p>'
+                + '<p style="font-family:Arial, Helvetica, sans-serif; padding-top:20px; padding-bottom:20px; margin:0;">'
+                + '<a href="' + client_url + '" style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: 600;'
+                + 'padding: 8px 15px; margin: 0; background: #3fb048; text-decoration: none; color: #fff; border-radius: 34px; width: 100%; display: inline-block; text-align: center; box-sizing: border-box;">Login</a>'
+                + '</p></td>'
+                + '</tr>'
+                + '</table>'
+                + '</div>'
+                + '</body>'
+                + '</html>'
+        };
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                console.log(error);
+                data = { suc: 0, msg: JSON.stringify(error) };
+            } else {
+                console.log('Email sent: ' + info.response);
+                data = { suc: 1, msg: 'Email sent: ' + info.response };
+            }
+            resolve(data);
+        });
+
+    })
+}
+
+module.exports = { ConfirmMenu, ApproveMenu, OrderEmail, PayEmail, UserCredential };
