@@ -24,7 +24,9 @@ MenuRouter.get('/menu_data', async (req, res) => {
         st_time = '',
         end_time = '',
         reg_menu_flag = '',
-        sql = '';
+        sql = '',
+        st_en_sql = '',
+        st_en_dt = '';
     var now = new Date();
     var data = {
         Monday: 2,
@@ -68,8 +70,10 @@ MenuRouter.get('/menu_data', async (req, res) => {
             FROM td_special_date_time WHERE restaurant_id = ${res_id} AND month_day = ${menu_date}`;
             sql_dt = await F_Select(sql);
             if (sql_dt.msg.length > 0) {
-                st_time = sql_dt.msg[0].start_time;
-                end_time = sql_dt.msg[0].end_time;
+                st_en_sql = `SELECT MIN(start_time) start_time, MAX(end_time) end_time FROM td_date_time WHERE restaurant_id = ${res_id} AND menu_id IN (${dt.special_dt.regular_menu_id})`;
+                st_en_dt = await F_Select(st_en_sql);
+                st_time = st_en_dt.msg[0].start_time;
+                end_time = st_en_dt.msg[0].end_time;
                 if (curr_time >= st_time && curr_time <= end_time) {
                     menu_active_flag = 'Y';
                     reg_menu_flag = sql_dt.msg[0].regular_menu_flag;
@@ -87,10 +91,14 @@ MenuRouter.get('/menu_data', async (req, res) => {
         } else {
             sql = `SELECT id, restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, month_day, menu_date, group_concat(DISTINCT regular_menu_id separator ',') as regular_menu_id, start_time, end_time
             FROM td_special_date_time WHERE restaurant_id = ${res_id} AND menu_date = "${now_date}"`;
+            // console.log({ex_sql: sql});
             sql_dt = await F_Select(sql);
             if (sql_dt.msg.length > 0) {
-                st_time = sql_dt.msg[0].start_time;
-                end_time = sql_dt.msg[0].end_time;
+                st_en_sql = `SELECT MIN(start_time) start_time, MAX(end_time) end_time FROM td_date_time WHERE restaurant_id = ${res_id} AND menu_id IN (${dt.special_dt.regular_menu_id})`;
+                st_en_dt = await F_Select(st_en_sql);
+                st_time = st_en_dt.msg[0].start_time;
+                end_time = st_en_dt.msg[0].end_time;
+                // console.log({st_time, end_time, curr_time});
                 if (curr_time >= st_time && curr_time <= end_time) {
                     menu_active_flag = 'Y';
                     reg_menu_flag = sql_dt.msg[0].regular_menu_flag;
@@ -154,22 +162,23 @@ MenuRouter.get('/menu_data', async (req, res) => {
     }
 
     // FETCH RESULT FROM MENUMODEL.JS MENUDATA FUNCTION //
-    var result = await MenuData(res_id, st_time = curr_time, end_time = curr_time, menu_id = 0, menu_date, greet, menu_active_flag, replace_menu_id, reg_menu_flag);
+    var result = await MenuData(res_id, cu_st_time = curr_time, cu_end_time = curr_time, menu_id = 0, menu_date, greet, menu_active_flag, replace_menu_id, reg_menu_flag, sp_st_time = st_time, sp_end_time = end_time);
     // console.log(result);
     res.send(result);
     //res.send({breakfast_st, breakfast_end, lunch_st, lunch_end, curr_time, dinner_st, dinner_end, greet})
 })
 
 const CheckSpecialMenu = async (res_id, date) => {
-    var cunt_sql = `SELECT id, menu_id, active_flag, regular_menu_flag, day_flag FROM td_special_date_time WHERE restaurant_id = ${res_id} LIMIT 1`;
-    var cunt_dt = await F_Select(cunt_sql);
     var special_dt = '',
         dt = '';
+    var cunt_sql = `SELECT id, menu_id, active_flag, regular_menu_flag, day_flag, group_concat(DISTINCT regular_menu_id separator ',') as regular_menu_id
+    FROM td_special_date_time WHERE restaurant_id = ${res_id}`;
+    var cunt_dt = await F_Select(cunt_sql);
     return new Promise((resolve, reject) => {
         if (cunt_dt.msg.length > 0) {
             dt = cunt_dt.msg[0];
             if (dt.active_flag != 'N') {
-                special_dt = { id: dt.id, menu_id: dt.menu_id, active_flag: dt.active_flag, regular_menu_flag: dt.regular_menu_flag, day_flag: dt.day_flag };
+                special_dt = { id: dt.id, menu_id: dt.menu_id, active_flag: dt.active_flag, regular_menu_flag: dt.regular_menu_flag, day_flag: dt.day_flag, regular_menu_id: dt.regular_menu_id };
                 res = true;
             } else {
                 special_dt = '';
@@ -190,6 +199,23 @@ MenuRouter.get('/check_menu', async (req, res) => {
         menu_id = req.query.menu_id;
     var data = await CheckMenu(res_id, st_time, end_time, null, menu_id);
     res.send(data);
+})
+
+MenuRouter.get('/check_special_overlap', async (req, res) => {
+    var res_id = req.query.id;
+    let sp_sql = `SELECT id, menu_id, active_flag, regular_menu_flag, day_flag, group_concat(DISTINCT regular_menu_id separator ',') as regular_menu_id
+    FROM td_special_date_time WHERE restaurant_id = ${res_id}`;
+    let sp_dt = await F_Select(sp_sql);
+    let ovl_sql = `SELECT DISTINCT a.menu_id, b.menu_description, a.start_time, a.end_time FROM td_date_time a, md_menu b WHERE a.menu_id=b.id AND a.restaurant_id = ${res_id} AND a.menu_id IN (${sp_dt.msg[0].regular_menu_id})`;
+    let ovl_dt = await F_Select(ovl_sql);
+    let st_en_sql = `SELECT MIN(start_time) start_time, MAX(end_time) end_time FROM td_date_time WHERE restaurant_id = ${res_id} AND menu_id IN (${sp_dt.msg[0].regular_menu_id})`;
+    let st_en_dt = await F_Select(st_en_sql);
+    let st_time = st_en_dt.msg[0].start_time;
+    let end_time = st_en_dt.msg[0].end_time;
+    if (sp_dt.msg[0].regular_menu_flag != 'E') {
+        ovl_dt.msg.push({ menu_id: 5, menu_description: 'Special Menu', start_time: st_time, end_time: end_time })
+    }
+    res.send(ovl_dt);
 })
 
 

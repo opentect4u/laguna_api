@@ -90,7 +90,7 @@ const CheckMenu = (res_id, st_time, end_time, date, menu_id) => {
     })
 }
 
-const MenuData = (res_id, st_time, end_time, menu_id, date, greet, menu_active_flag, replace_menu_id, reg_menu_flag) => {
+const MenuData = (res_id, st_time, end_time, menu_id, date, greet, menu_active_flag, replace_menu_id, reg_menu_flag, sp_st_time, sp_end_time) => {
     var dat = {},
         sp_menu_sql = '',
         sp_menu = '';
@@ -129,6 +129,9 @@ const MenuData = (res_id, st_time, end_time, menu_id, date, greet, menu_active_f
                     sp_menu_sql = `SELECT a.*, b.name as cat_name FROM td_special_data a, md_special_category b WHERE a.img_catg=b.id AND a.restaurant_id = "${res_id}" AND a.menu_id = 5`;
                     let sp_menu_dt = await F_Select(sp_menu_sql);
                     sp_menu = sp_menu_dt.msg[0];
+                    if (reg_menu_flag != 'E') {
+                        menu_check.msg.push({ menu_id: 5, menu_description: 'Special Menu', start_time: sp_st_time, end_time: sp_end_time })
+                    }
                 } else {
                     sp_menu = '';
                 }
@@ -139,7 +142,6 @@ const MenuData = (res_id, st_time, end_time, menu_id, date, greet, menu_active_f
             resolve(data)
         })
     })
-
 }
 
 module.exports = { PreviewMenu, CheckMenu, MenuData };

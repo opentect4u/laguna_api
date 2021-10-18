@@ -40,4 +40,11 @@ LogRouter.get('/check_menu_setup', async (req, res) => {
     res.send(data);
 })
 
+LogRouter.get('/check_active_status', async (req, res) => {
+    var res_id = req.query.id;
+    let sql = `SELECT * FROM md_url WHERE restaurant_id = ${res_id}`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
 module.exports = { LogRouter };
