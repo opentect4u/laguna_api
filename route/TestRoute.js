@@ -360,7 +360,7 @@ TestRouter.post('/section', async (req, res) => {
 const UploadSectionImg = (files, img_type, data) => {
     var filename = '',
         res = '';
-    if (files) {
+    if (files != '') {
         // var filename = data.restaurant_id + '_' + data.menu_id + '_' + img_type + '_' + files.name;
         // return new Promise(async (resolve, reject) => {
         //     files.mv('uploads/' + filename, async (err) => {

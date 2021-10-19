@@ -100,6 +100,7 @@ const MenuData = (res_id, st_time, end_time, menu_id, date, greet, menu_active_f
     FROM md_item_description a, md_section c, td_date_time e
     WHERE a.section_id = c.id
     AND a.menu_id=e.menu_id
+	AND a.restaurant_id=e.restaurant_id
     AND a.restaurant_id = "${res_id}"
     AND e.start_time <= '${st_time}'
     AND e.end_time >= '${end_time}' ${whr_menu} ${whr_dt}

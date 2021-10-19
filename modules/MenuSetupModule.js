@@ -458,13 +458,17 @@ const Check_Data = (db_name, whr) => {
 
 const SectionSave = (data, sec_img) => {
     var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
-    var sql = '';
+    var sql = '',
+        up_fild = '',
+        in_field = '';
     if (data.id > 0) {
-        sql = `UPDATE md_section SET menu_id = "${data.menu_id}", section_name = "${data.sec_name}", section_img = "${sec_img}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
+        up_fild = sec_img != '' ? `, section_img = "${sec_img}"` : '';
+        sql = `UPDATE md_section SET menu_id = "${data.menu_id}", section_name = "${data.sec_name}" ${up_fild}, modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
         WHERE id = "${data.id}"`;
     } else {
+        in_field = sec_img != '' ? sec_img : ''
         sql = `INSERT INTO md_section (restaurant_id, menu_id, section_name, section_img, created_by, created_dt) VALUES
-        ("${data.restaurant_id}", "${data.menu_id}", "${data.sec_name}", "${sec_img}", "${data.restaurant_id}", "${datetime}")`;
+        ("${data.restaurant_id}", "${data.menu_id}", "${data.sec_name}", "${in_field}", "${data.restaurant_id}", "${datetime}")`;
     }
     return new Promise((resolve, reject) => {
         db.query(sql, (err, lastId) => {

@@ -183,7 +183,7 @@ const SendAdminUnapproveMail = async (res_id, apr_flag, menu_list, desc) => {
         });
 
         var mailOptions = {
-            from: 'support@synergicportal.in',
+            from: 'admin@shoplocal-lagunabeach.com',
             to: res_email,
             subject: 'Shoplocal Menu Approval',
             html: '<!DOCTYPE html>'
