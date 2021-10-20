@@ -41,14 +41,6 @@ MenuRouter.get('/menu_data', async (req, res) => {
         morning_end = '11:59:59',
         noon_st = '12:00:00',
         noon_end = '17:59:59';
-    var breakfast_st = '',
-        breakfast_end = '',
-        lunch_st = '',
-        lunch_end = '',
-        dinner_st = '',
-        dinner_end = '',
-        brunch_st = '',
-        brunch_end = '';
     var greet = '';
     var date = dateFormat(now, "dddd"),
         menu_date = data[date],
@@ -65,6 +57,7 @@ MenuRouter.get('/menu_data', async (req, res) => {
     // CHECK SPECIAL MENU OPERATION //
     var dt = await (CheckSpecialMenu(res_id, menu_date));
     if (dt.res) {
+        // FOR EXCLUSIVE SPECIAL MENU //
         if (dt.special_dt.day_flag == 'E') {
             sql = `SELECT id, restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, month_day, menu_date, group_concat(DISTINCT regular_menu_id separator ',') as regular_menu_id, start_time, end_time 
             FROM td_special_date_time WHERE restaurant_id = ${res_id} AND month_day = ${menu_date}`;
@@ -74,6 +67,7 @@ MenuRouter.get('/menu_data', async (req, res) => {
                 st_en_dt = await F_Select(st_en_sql);
                 st_time = st_en_dt.msg[0].start_time;
                 end_time = st_en_dt.msg[0].end_time;
+                // FOR ACTIVATION TIMING SPECIAL MENU //
                 if (curr_time >= st_time && curr_time <= end_time) {
                     menu_active_flag = 'Y';
                     reg_menu_flag = sql_dt.msg[0].regular_menu_flag;
@@ -89,6 +83,7 @@ MenuRouter.get('/menu_data', async (req, res) => {
                 replace_menu_id = 0;
             }
         } else {
+            // FOR IN ADDITION SPECIAL MENU //
             sql = `SELECT id, restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, month_day, menu_date, group_concat(DISTINCT regular_menu_id separator ',') as regular_menu_id, start_time, end_time
             FROM td_special_date_time WHERE restaurant_id = ${res_id} AND menu_date = "${now_date}"`;
             // console.log({ex_sql: sql});
@@ -98,7 +93,7 @@ MenuRouter.get('/menu_data', async (req, res) => {
                 st_en_dt = await F_Select(st_en_sql);
                 st_time = st_en_dt.msg[0].start_time;
                 end_time = st_en_dt.msg[0].end_time;
-                // console.log({st_time, end_time, curr_time});
+                // FOR ACTIVATION TIMING SPECIAL MENU //
                 if (curr_time >= st_time && curr_time <= end_time) {
                     menu_active_flag = 'Y';
                     reg_menu_flag = sql_dt.msg[0].regular_menu_flag;
@@ -117,40 +112,6 @@ MenuRouter.get('/menu_data', async (req, res) => {
             }
         }
     }
-    // console.log({ menu_active_flag, replace_menu_id, reg_menu_flag });
-
-    // GET START TIME AND END TIME WITH CURRENT MONTH_DAY //
-    // let dt_sql = `SELECT * FROM td_date_time WHERE restaurant_id = "${res_id}" AND month_day = "${menu_date}"`;
-    // console.log(sql);
-    // var dt_data = await F_Select(dt_sql);
-    // console.log(dt_data.msg);
-
-    // SET START TIME AND END TIME WITH MENU ID //
-    // for (let i = 0; i < dt_data.msg.length; i++) {
-    //     if (dt_data.msg[i].menu_id == 1) {
-    //         breakfast_st = dt_data.msg[i].start_time;
-    //         breakfast_end = dt_data.msg[i].end_time;
-    //     } else if (dt_data.msg[i].menu_id == 2) {
-    //         lunch_st = dt_data.msg[i].start_time;
-    //         lunch_end = dt_data.msg[i].end_time;
-    //     } else if (dt_data.msg[i].menu_id == 3) {
-    //         dinner_st = dt_data.msg[i].start_time;
-    //         dinner_end = dt_data.msg[i].end_time;
-    //     } else if (dt_data.msg[i].menu_id == 4) {
-    //         brunch_st = dt_data.msg[i].start_time;
-    //         brunch_end = dt_data.msg[i].end_time;
-    //     }
-    // }
-
-    // breakfast_st = breakfast_st;
-    // breakfast_end = breakfast_end;
-    // lunch_st = lunch_st ? lunch_st : (breakfast_end ? breakfast_end : curr_time);
-    // lunch_end = lunch_end ? lunch_end : (dinner_st ? dinner_st : '');
-    // dinner_st = dinner_st ? dinner_st : (lunch_end ? lunch_end : curr_time);
-    // dinner_end = dinner_end;
-    // brunch_st = brunch_st;
-    // brunch_end = brunch_end;
-    //let curr_time = dateFormat(now, "HH:MM:ss");
 
     // CHECK CURRENT TIME WITH START TIME AND END TIME //
     if (curr_time >= morning_st && curr_time <= morning_end) {
@@ -163,11 +124,10 @@ MenuRouter.get('/menu_data', async (req, res) => {
 
     // FETCH RESULT FROM MENUMODEL.JS MENUDATA FUNCTION //
     var result = await MenuData(res_id, cu_st_time = curr_time, cu_end_time = curr_time, menu_id = 0, menu_date, greet, menu_active_flag, replace_menu_id, reg_menu_flag, sp_st_time = st_time, sp_end_time = end_time);
-    // console.log(result);
     res.send(result);
-    //res.send({breakfast_st, breakfast_end, lunch_st, lunch_end, curr_time, dinner_st, dinner_end, greet})
 })
 
+// CHECKING SPECIAL MENU IS ACTIVE OR NOT //
 const CheckSpecialMenu = async (res_id, date) => {
     var special_dt = '',
         dt = '';
@@ -192,6 +152,7 @@ const CheckSpecialMenu = async (res_id, date) => {
     })
 }
 
+// CHECKING OVERLAP MENU //
 MenuRouter.get('/check_menu', async (req, res) => {
     var res_id = req.query.id,
         st_time = req.query.st_time,
