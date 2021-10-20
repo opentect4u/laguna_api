@@ -172,7 +172,7 @@ const CheckSpecialMenu = async (res_id, date) => {
     var special_dt = '',
         dt = '';
     var cunt_sql = `SELECT id, menu_id, active_flag, regular_menu_flag, day_flag, group_concat(DISTINCT regular_menu_id separator ',') as regular_menu_id
-    FROM td_special_date_time WHERE restaurant_id = ${res_id}`;
+    FROM td_special_date_time WHERE restaurant_id = ${res_id} AND month_day = ${date}`;
     var cunt_dt = await F_Select(cunt_sql);
     return new Promise((resolve, reject) => {
         if (cunt_dt.msg.length > 0) {
