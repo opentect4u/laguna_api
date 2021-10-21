@@ -83,7 +83,6 @@ const MenuImageSave = async (data, cov_img_path, top_img_path) => {
 }
 
 const OtherImageSave = async (data, menu_img) => {
-    console.log({ menu_img, t: Array.isArray(menu_img) });
     var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
     var sql = '';
     if (Array.isArray(menu_img)) {
@@ -92,7 +91,7 @@ const OtherImageSave = async (data, menu_img) => {
             if (menu_data.msg.length < 1) {
                 sql = `INSERT INTO td_menu_image (restaurant_id, menu_id, active_flag, menu_url, menu_img, created_by, created_dt) VALUES
             ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${data.MenuUrl}", "${menu_img[i].filename}", "${data.restaurant_id}", "${datetime}")`;
-                console.log({ arr_sql: sql });
+                // console.log({ arr_sql: sql });
                 db.query(sql, (err, lastId) => {
                     if (err) {
                         console.log(err);
@@ -103,16 +102,6 @@ const OtherImageSave = async (data, menu_img) => {
                 })
             }
         }
-        //     sql = `UPDATE td_menu_image SET active_flag = "${data.break_check}", menu_url = "${data.MenuUrl}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
-        // WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}"`;
-        //     db.query(sql, (err, lastId) => {
-        //         if (err) {
-        //             console.log(err);
-        //             res = false;
-        //         } else {
-        //             res = true;
-        //         }
-        //     })
     } else {
         if (menu_img) {
             let menu_data = await F_Select(`SELECT * FROM td_menu_image WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}" AND menu_img = "${menu_img}"`);
@@ -140,16 +129,6 @@ const OtherImageSave = async (data, menu_img) => {
                 }
             })
         }
-        console.log({ el_sql: sql });
-        //     var chk_dt = await Check_Data(db_name = 'td_menu_image', whr = `WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}"`);
-        //     if (chk_dt > 1) {
-        //         sql = `INSERT INTO td_menu_image (restaurant_id, menu_id, active_flag, menu_url, menu_img, created_by, created_dt) VALUES
-        //  ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${data.MenuUrl}", "${menu_img}", "${data.restaurant_id}", "${datetime}")`;
-        //     } else {
-        //         sql = `UPDATE td_menu_image SET active_flag = "${data.break_check}", menu_url = "${data.MenuUrl}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
-        //     WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}"`;
-        //     }
-
     }
     var chk_dt = await Check_Data(db_name = 'td_menu_image', whr = `WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}"`);
     if (chk_dt > 1) {
@@ -159,8 +138,6 @@ const OtherImageSave = async (data, menu_img) => {
         sql = `UPDATE td_menu_image SET active_flag = "${data.break_check}", menu_url = "${data.MenuUrl}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
         WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}"`;
     }
-    // sql = `UPDATE td_menu_image SET active_flag = "${data.break_check}", menu_url = "${data.MenuUrl}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
-    //     WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}"`;
     db.query(sql, (err, lastId) => {
         if (err) {
             console.log(err);
@@ -169,34 +146,6 @@ const OtherImageSave = async (data, menu_img) => {
             res = true;
         }
     })
-
-    // for()
-    // let up_img = menu_img != '' ? `, menu_img = "${menu_img}"` : '';
-    // var chk_dt = await Check_Data(db_name = 'td_menu_image', whr = `WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}" AND menu_img LIKE "${data.restaurant_id}_${data.menu_id}_menu_${i}_%"`);
-
-    // console.log({ i, menu_img, chk_dt: chk_dt });
-
-    // if (chk_dt > 1) {
-    //     sql = `INSERT INTO td_menu_image (restaurant_id, menu_id, active_flag, menu_url, menu_img, created_by, created_dt) VALUES
-    //  ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${data.MenuUrl}", "${menu_img}", "${data.restaurant_id}", "${datetime}")`;
-    // } else {
-    //     sql = `UPDATE td_menu_image SET active_flag = "${data.break_check}" ${up_img}, menu_url = "${data.MenuUrl}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
-    //     WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}"`;
-    // }
-    // console.log({ menu: sql });
-    // // var sql = `INSERT INTO td_menu_image (restaurant_id, menu_id, active_flag, menu_url, menu_img, created_by, created_dt) VALUES
-    // // ("${data.restaurant_id}", "${data.menu_id}", "${data.break_check}", "${data.MenuUrl}", "${menu_img}", "${data.restaurant_id}", "${datetime}")`;
-    // return new Promise((resolve, reject) => {
-    //     db.query(sql, (err, lastId) => {
-    //         if (err) {
-    //             console.log(err);
-    //             data = false;
-    //         } else {
-    //             data = true;
-    //         }
-    //     })
-    //     resolve(data)
-    // })
 }
 
 const SectionImageSave = async (data, sec_img) => {

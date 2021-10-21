@@ -115,11 +115,14 @@ MenuRouter.get('/menu_data', async (req, res) => {
 
     // CHECK CURRENT TIME WITH START TIME AND END TIME //
     if (curr_time >= morning_st && curr_time <= morning_end) {
-        greet = 'Good Morning';
+        // greet = 'Good Morning';
+        greet = 1;
     } else if (curr_time >= noon_st && curr_time < noon_end) {
-        greet = 'Good Afternoon';
+        // greet = 'Good Afternoon';
+        greet = 2;
     } else {
-        greet = 'Good Evening';
+        // greet = 'Good Evening';
+        greet = 3;
     }
 
     // FETCH RESULT FROM MENUMODEL.JS MENUDATA FUNCTION //
