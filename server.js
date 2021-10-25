@@ -27,6 +27,7 @@ const { EmailRouter } = require('./route/EmailRouter');
 const { MenuRouter } = require('./route/MenuRouter');
 const { SpecialRouter } = require('./route/SpecialRouter');
 const { CalenderRouter } = require('./route/CalenderRouter');
+const { PromoRouter } = require('./route/PromoRouter');
 ///////////////////////////////////////////
 
 // REGISTRATION ROUTER RegistrationRouter.js FOLDER //
@@ -50,6 +51,8 @@ app.use(MenuRouter);
 app.use(SpecialRouter);
 
 app.use(CalenderRouter);
+
+app.use(PromoRouter);
 
 
 app.get('/', async (req, res) => {

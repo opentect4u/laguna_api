@@ -501,8 +501,11 @@ const create = async (dataForQRcode, center_image, width, cwidth, data) => {
     let img_name = data.res_id + '_qr.png';
     let path = 'uploads/' + img_name;
     ctx.drawImage(img, center, center, cwidth, cwidth);
-    const buffer = canvas.toBuffer("image/png");
-    fs.writeFileSync(path, buffer)
+    const out = fs.createWriteStream(path);
+    const stream = canvas.createPNGStream();
+    stream.pipe(out)
+    // const buffer = canvas.toBuffer("image/png");
+    // fs.writeFileSync(path, buffer)
     return new Promise((resolve, reject) => {
         resolve({ path, img_name });
     })
@@ -537,7 +540,6 @@ const GenerateQr = async (data) => {
         })
     })
     // let ckh_sql = `SELECT * FROM md_url WHERE `;
-
 }
 
 module.exports = {
