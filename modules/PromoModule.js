@@ -1,6 +1,7 @@
 const db = require('../core/db');
 const dateFormat = require('dateformat');
 const { F_Select } = require('./MenuSetupModule');
+const { PromoConfirmMail } = require('./EmailModule');
 
 const IntroSave = async (data) => {
     var db_name = data.flag > 0 ? 'md_promotion_restaurant' : 'md_promotion_admin';
@@ -175,9 +176,9 @@ const StatusSave = async (data) => {
     var chk_sql = `SELECT id, COUNT(id) as cunt_dt FROM md_promotion_restaurant WHERE restaurant_id = ${data.res_id}`;
     var chk_dt = await F_Select(chk_sql);
     if (chk_dt.msg[0].cunt_dt > 0) {
-        sql = `UPDATE md_promotion_restaurant SET menu_id = "${data.menu_id}", section_id = "${data.sec_id}", status_id = "${data.status}", modified_by = "${data.user}", modified_at = "${datetime}" WHERE restaurant_id = ${data.res_id}`;
+        sql = `UPDATE md_promotion_restaurant SET menu_id = "${data.menu_id}", month_day = "${data.sec_id}", status_id = "${data.status}", modified_by = "${data.user}", modified_at = "${datetime}" WHERE restaurant_id = ${data.res_id}`;
     } else {
-        sql = `INSERT INTO md_promotion_restaurant (restaurant_id, menu_id, section_id, status_id, created_by, created_at) VALUES ("${data.res_id}", "${data.menu_id}", "${data.sec_id}", "${data.status}", "${data.user}", "${datetime}")`;
+        sql = `INSERT INTO md_promotion_restaurant (restaurant_id, menu_id, month_day, status_id, created_by, created_at) VALUES ("${data.res_id}", "${data.menu_id}", "${data.sec_id}", "${data.status}", "${data.user}", "${datetime}")`;
     }
     return new Promise((resolve, reject) => {
         db.query(sql, (err, lastId) => {
@@ -213,11 +214,13 @@ const PromoSave = async (data) => {
         VALUES ("${data.res_id}", "${data.f_name}", "${data.l_name}", "${data.email}" ${in_bir_val} ${in_ani_val}, "${data.auth}", "${data.mob_no}", "${data.q_1}", "${data.q_2}", "${data.q_3}", "${data.user}", "${datetime}")`;
     }
     return new Promise((resolve, reject) => {
-        db.query(sql, (err, lastId) => {
+        db.query(sql, async (err, lastId) => {
             if (err) {
                 console.log(err);
                 res = { suc: 0, msg: JSON.stringify(err) };
             } else {
+                var name = data.f_name + ' ' + data.l_name;
+                var promo_dt = await PromoConfirmMail(data.res_id, data.email, name);
                 res = { suc: 1, msg: 'Inserted Successfully !!' };
             }
             resolve(res);

@@ -70,4 +70,31 @@ PromoRouter.get('/get_promotion_dt', async (req, res) => {
     res.send(data);
 })
 
+PromoRouter.get('/get_promo_dt', async (req, res) => {
+    var frm_dt = req.query.frm_dt,
+        to_dt = req.query.to_dt,
+        res_id = req.query.id;
+    let sql = `SELECT * FROM td_promotions WHERE restaurant_id = ${res_id} AND DATE(created_at) >= "${frm_dt}" AND DATE(created_at) <= "${to_dt}"`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
+PromoRouter.get('/get_promo_cat_dtls', async (req, res) => {
+    var bth_id = 24,
+        ani_id = 25;
+    var sql = `SELECT * FROM md_special_category WHERE id in(${bth_id}, ${ani_id})`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
+PromoRouter.get('/promo_stock_img', async (req, res) => {
+    var cat_id = req.query.cat_id;
+    var bth_id = 24,
+        ani_id = 25;
+    let whr = cat_id > 0 ? `WHERE img_catg = ${cat_id}` : `WHERE img_catg IN (${bth_id}, ${ani_id})`;
+    let sql = `SELECT * FROM td_stock_image ${whr}`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
 module.exports = { PromoRouter }

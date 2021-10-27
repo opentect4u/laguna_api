@@ -522,4 +522,88 @@ const UserCredential = async (res_id, password) => {
     })
 }
 
-module.exports = { ConfirmMenu, ApproveMenu, OrderEmail, PayEmail, UserCredential };
+// PROMOTION CONFIRMATION MAIL TO USER //
+const PromoConfirmMail = async (res_id, email, user_name) => {
+    let con_sql = `SELECT * FROM td_contacts WHERE id = "${res_id}"`;
+    var con = await F_Select(con_sql);
+    var promo_sql = `SELECT * FROM md_promotion_restaurant WHERE restaurant_id = ${res_id}`,
+        promo_dt = await F_Select(promo_sql),
+        body = promo_dt.msg[0].confirm_email;
+    var contact_name = user_name,
+        email_id = email,
+        res_name = con.msg[0].restaurant_name,
+        res_contact_name = con.msg[0].contact_name;
+    return new Promise(async (resolve, reject) => {
+        // FOR LOCAL
+        // var transporter = nodemailer.createTransport({
+        //     service: 'gmail',
+        //     auth: {
+        //         user: 'synergicbbps@gmail.com',
+        //         pass: 'Signature@123'
+        //     }
+        // });
+
+        // FOR SERVER
+        var transporter = nodemailer.createTransport({
+            //pool: true,
+            host: 'webmail.shoplocal-lagunabeach.com',
+            port: 25,
+            secure: false,
+            auth: {
+                user: 'admin@shoplocal-lagunabeach.com',
+                pass: 'dY786#lw!Laguna'
+            },
+            tls: {
+                // do not fail on invalid certs
+                rejectUnauthorized: false
+            }
+        });
+
+        var mailOptions = {
+            from: 'admin@shoplocal-lagunabeach.com',
+            to: email_id,
+            subject: 'Congratulations! Your Promotions is on the way',
+            html: '<!DOCTYPE html>'
+                + '<html>'
+                + '<head>'
+                + '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />'
+                + '<title>ShopLocal</title>'
+                + '<style type="text/css">'
+                + 'body{margin:0; padding:0; font-family:14px; font-family:Arial, Helvetica, sans-serif;}'
+                + '</style>'
+                + '</head>'
+                + '<body>'
+                + '<div class="sectionArea" style="max-width:750px; width:100%; margin:2% auto 2% auto; padding:15px; background:#faf9f9; border-radius:15px;border: #ececec solid 1px;">'
+                + '<table width="100%" border="0" cellspacing="0" cellpadding="0">'
+                + '<tr>'
+                + '<td align="left" valign="top" class="logoArea" style="padding:0 0 25px 0; text-align:center;"><img src="https://eporiseva.com/sll_logo.png" width="402" height="300" alt="" style="max-width:190px; width:100%; height:auto; margin:0 auto;"></td>'
+                + '</tr>'
+                + '<tr>'
+                + '<td align="left" valign="top">'
+                + '<h2 style="font-size:18px; font-weight:700; font-family:Arial, Helvetica, sans-serif;">Hi ' + contact_name + ',</h2>'
+                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">' + body + '</p>'
+                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:19px; padding-bottom:15px; margin:0;"><strong>Your Sincerely</strong>,<br>'
+                + res_contact_name + '<br>'
+                + res_name + '</p>'
+                + '</td>'
+                + '</tr>'
+                + '</table>'
+                + '</div>'
+                + '</body>'
+                + '</html>'
+        };
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                console.log(error);
+                data = { suc: 0, msg: JSON.stringify(error) };
+            } else {
+                console.log('Email sent: ' + info.response);
+                data = { suc: 1, msg: 'Email sent: ' + info.response };
+            }
+            resolve(data);
+        });
+
+    })
+}
+
+module.exports = { ConfirmMenu, ApproveMenu, OrderEmail, PayEmail, UserCredential, PromoConfirmMail };

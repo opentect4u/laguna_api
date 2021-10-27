@@ -14,4 +14,7 @@ EmailRouter.post('/approve_menu', async (req, res) => {
     res.send(data);
 })
 
+// var dayInMilliseconds = 1000 * 60 * 60 * 24;
+// setInterval(function () { alert("foo"); }, dayInMilliseconds);
+
 module.exports = { EmailRouter }
