@@ -192,4 +192,37 @@ const StatusSave = async (data) => {
     })
 }
 
-module.exports = { IntroSave, ConfEmailSave, PouUpSave, QuestionSave, MailingEmailSave, PromoImgSave, StatusSave };
+const PromoSave = async (data) => {
+    let chk_sql = `SELECT * FROM td_promotions WHERE email = "${data.email}" AND restaurant_id = ${data.res_id}`;
+    var chk_dt = await F_Select(chk_sql);
+    var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),
+        sql = '',
+        up_ani_col = data.anni_dt != '' ? `, anniversary_dt="${data.anni_dt}"` : '',
+        up_bir_col = data.birth_dt ? `, birth_dt="${data.birth_dt}"` : '',
+        in_ani_col = data.anni_dt != '' ? ', anniversary_dt' : '',
+        in_ani_val = data.anni_dt != '' ? `, "${data.anni_dt}"` : '',
+        in_bir_col = data.birth_dt ? `, birth_dt` : '',
+        in_bir_val = data.birth_dt ? `, "${data.birth_dt}"` : '';
+    if (chk_dt.msg.length > 0) {
+        sql = `UPDATE td_promotions SET first_name="${data.f_name}",last_name="${data.l_name}" ${up_bir_col} ${up_ani_col},
+        authorization="${data.auth}",mobile_no="${data.mob_no}",questions1="${data.q_1}",
+        questions2="${data.q_2}",questions3="${data.q_3}",modified_by="${data.user}",modified_at="${datetime}"
+        WHERE email = "${data.email}" AND restaurant_id = ${data.res_id}`;
+    } else {
+        sql = `INSERT INTO td_promotions (restaurant_id, first_name, last_name, email ${in_bir_col} ${in_ani_col}, authorization, mobile_no, questions1, questions2, questions3, created_by, created_at)
+        VALUES ("${data.res_id}", "${data.f_name}", "${data.l_name}", "${data.email}" ${in_bir_val} ${in_ani_val}, "${data.auth}", "${data.mob_no}", "${data.q_1}", "${data.q_2}", "${data.q_3}", "${data.user}", "${datetime}")`;
+    }
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err, lastId) => {
+            if (err) {
+                console.log(err);
+                res = { suc: 0, msg: JSON.stringify(err) };
+            } else {
+                res = { suc: 1, msg: 'Inserted Successfully !!' };
+            }
+            resolve(res);
+        })
+    })
+}
+
+module.exports = { IntroSave, ConfEmailSave, PouUpSave, QuestionSave, MailingEmailSave, PromoImgSave, StatusSave, PromoSave };

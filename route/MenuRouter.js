@@ -5,12 +5,25 @@ const { F_Select } = require('../modules/MenuSetupModule');
 const MenuRouter = express.Router();
 
 MenuRouter.get('/preview_menu', async (req, res) => {
+    var now = new Date();
+    var dt = {
+        Monday: 2,
+        Tuesday: 3,
+        Wednesday: 4,
+        Thursday: 5,
+        Friday: 6,
+        Saturday: 7,
+        Sunday: 8,
+    };
+    var now_date = dateFormat(now, "dddd"),
+        menu_date = dt[now_date];
+
     let res_id = req.query.id,
         str_time = req.query.st_time,
         end_time = req.query.end_time,
         menu_id = req.query.menu_id,
         date = 0;
-    var data = await PreviewMenu(res_id, str_time, end_time, menu_id, date);
+    var data = await PreviewMenu(res_id, str_time, end_time, menu_id, date, menu_date);
     // console.log(data);
     // res.setHeader('Content-Type', 'application/json');
     res.send(data);
