@@ -17,7 +17,6 @@ MenuRouter.get('/preview_menu', async (req, res) => {
     };
     var now_date = dateFormat(now, "dddd"),
         menu_date = dt[now_date];
-
     let res_id = req.query.id,
         str_time = req.query.st_time,
         end_time = req.query.end_time,

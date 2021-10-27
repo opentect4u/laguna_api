@@ -29,7 +29,6 @@ const PreviewMenu = (res_id, st_time, end_time, menu_id, date, menu_date) => {
                     // dat[result[i].section_name] = ;
                     // console.log(dat);
                 }
-                // console.log(dat);
                 var promo_ckh = await CheckPromotion(res_id, menu_date, menu_id);
                 if (promo_ckh == 'Y') {
                     promo_sql = `SELECT * FROM md_promotion_restaurant WHERE restaurant_id = ${res_id} AND status_id = '0'`;
