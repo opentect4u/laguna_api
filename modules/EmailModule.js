@@ -606,4 +606,29 @@ const PromoConfirmMail = async (res_id, email, user_name) => {
     })
 }
 
-module.exports = { ConfirmMenu, ApproveMenu, OrderEmail, PayEmail, UserCredential, PromoConfirmMail };
+const PromoEmail = async () => {
+    var now_date = dateFormat(new Date(), "dd-mm");
+    var sql = `SELECT a.id, CONCAT(a.first_name, ' ', a.last_name) as name, 
+        date_format(date(a.birth_dt - INTERVAL 14 DAY), "%d-%m") as bd_dt,
+        date_format(date(a.anniversary_dt - INTERVAL 14 DAY), "%d-%m") as ani_dt,
+        a.birth_dt, a.anniversary_dt, b.restaurant_name, b.contact_name, b.phone_no, b.email, b.addr_line1 as address, c.mailing_email_subject mail_subj, c.mailing_email_body mail_body, d.url
+        FROM td_promotions a, td_contacts b, md_promotion_restaurant c, md_url d
+        WHERE a.restaurant_id=b.id
+        AND a.restaurant_id=c.restaurant_id
+        AND a.restaurant_id=d.restaurant_id`;
+    var data = await F_Select(sql);
+    if (data.msg.length > 0) {
+        data.msg.forEach(dt => {
+            var mail_body = dt.mail_body;
+            var bd_greet = dt.bd_dt == now_date ? 'Happy Birthday' : '',
+                ani_greet = dt.ani_dt == now_date ? 'Happy Anniversary' : '',
+                greet = bd_greet != '' & ani_greet != '' ? 'Happy Birthday & Happy Anniversary' : (bd_greet != '' ? bd_greet : ani_greet);
+
+            var body = mail_body.replace('[User Name]!', dt.name).replace('[Birthday/Anniversary]!', greet).replace('[Birthday/Anniversary]!', greet).replace("[Restaurant's Contact Name]!", dt.contact_name).replace('[Name of Restaurant]!', dt.restaurant_name).replace('[Address]!', dt.address).replace('[Phone]!', dt.phone_no).replace('[Email]!', dt.email).replace('[Menu Url]!', dt.url);
+            console.log(body);
+        })
+    }
+    // var user_name = data.msg[0].
+}
+
+module.exports = { ConfirmMenu, ApproveMenu, OrderEmail, PayEmail, UserCredential, PromoConfirmMail, PromoEmail };

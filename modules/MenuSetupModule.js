@@ -542,6 +542,50 @@ const GenerateQr = async (data) => {
     // let ckh_sql = `SELECT * FROM md_url WHERE `;
 }
 
+const AddMenu = (data) => {
+    var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
+    var sql = '',
+        id = data.id;
+    if (id > 0) {
+        sql = `UPDATE md_menu SET menu_description = "${data.menu_name}", modified_by = "${data.user}", modified_dt = "${datetime}" WHERE restaurant_id = "${res_id}" AND id = ${id}`;
+    } else {
+        sql = `INSERT INTO md_menu (menu_description, restaurant_id, created_by, created_dt) VALUES 
+    ("${data.menu_name}", "${data.res_id}", "${data.user}", "${datetime}")`;
+    }
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err, lastId) => {
+            if (err) {
+                console.log(err);
+                data = { suc: 0, msg: JSON.stringify(err) };
+            } else {
+                data = { suc: 1, msg: 'Inserted Successfully !!' };
+            }
+            resolve(data);
+        })
+    })
+}
+
+const DeleteMenuAdditional = (id) => {
+    var data = '';
+    return new Promise((resolve, reject) => {
+        if (id > 0) {
+            let sql = `DELETE md_menu WHERE id = ${id}`;
+            db.query(sql, (err, lastId) => {
+                if (err) {
+                    console.log(err);
+                    data = { suc: 0, msg: JSON.stringify(err) };
+                } else {
+                    data = { suc: 1, msg: 'Deleted Successfully !!' };
+                }
+                resolve(data);
+            })
+        } else {
+            data = { suc: 0, msg: 'Id can not be 0' };
+            resolve()
+        }
+    })
+}
+
 module.exports = {
-    BreakfastSave, MenuSave, LogoSave, AboutUsSave, NoticeSave, F_Select, MonthDateSave, SectionSave, ItemSave, ItemPriceSave, GenerateQr, MenuImageSave, OtherImageSave, SectionImageSave, Check_Data
+    BreakfastSave, MenuSave, LogoSave, AboutUsSave, NoticeSave, F_Select, MonthDateSave, SectionSave, ItemSave, ItemPriceSave, GenerateQr, MenuImageSave, OtherImageSave, SectionImageSave, Check_Data, AddMenu, DeleteMenuAdditional
 };

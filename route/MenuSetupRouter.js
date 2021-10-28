@@ -1,5 +1,5 @@
 const express = require('express');
-const { BreakfastSave, MenuSave, LogoSave, AboutUsSave, NoticeSave, F_Select, MonthDateSave, SectionSave, ItemSave, ItemPriceSave, GenerateQr } = require('../modules/MenuSetupModule');
+const { BreakfastSave, MenuSave, LogoSave, AboutUsSave, NoticeSave, F_Select, MonthDateSave, SectionSave, ItemSave, ItemPriceSave, GenerateQr, AddMenu, DeleteMenuAdditional } = require('../modules/MenuSetupModule');
 const { TestRouter, UploadLogo } = require('./TestRoute');
 const MenuSetRouter = express.Router();
 
@@ -173,6 +173,25 @@ MenuSetRouter.post('/generate_qr', async (req, res) => {
     console.log(req.body);
     var data = await GenerateQr(req.body);
     console.log(data);
+    res.send(data);
+})
+
+MenuSetRouter.post('/add_menu', async (req, res) => {
+    var data = req.body;
+    var dt = await AddMenu(data);
+    res.send(dt);
+})
+
+MenuSetRouter.get('/add_menu', async (req, res) => {
+    var res_id = req.query.res_id;
+    let sql = `SELECT * FROM md_menu WHERE restaurant_id = ${res_id}`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
+MenuSetRouter.get('/delete_menu', async (req, res) => {
+    var id = req.query.id;
+    var data = await DeleteMenuAdditional(id);
     res.send(data);
 })
 

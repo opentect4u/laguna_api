@@ -1,5 +1,5 @@
 const express = require('express');
-const { ConfirmMenu, ApproveMenu } = require('../modules/EmailModule');
+const { ConfirmMenu, ApproveMenu, PromoEmail } = require('../modules/EmailModule');
 const EmailRouter = express.Router();
 
 EmailRouter.get('/approve_menu', async (req, res) => {
@@ -14,6 +14,17 @@ EmailRouter.post('/approve_menu', async (req, res) => {
     res.send(data);
 })
 
+EmailRouter.get('/dynamic_email_send', (req, res) => {
+    var dayInMilliseconds = 1000 * 10;
+    var count = 1;
+    setInterval(async () => {
+        count++;
+        await PromoEmail();
+        console.log('Welcome ' + count + 'times');
+    }, dayInMilliseconds);
+    res.send('Welcome ' + count + 'times')
+})
+// var dayInMilliseconds = 1000 * 60 * 60 * 24;
 // var dayInMilliseconds = 1000 * 60 * 60 * 24;
 // setInterval(function () { alert("foo"); }, dayInMilliseconds);
 
