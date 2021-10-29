@@ -608,24 +608,110 @@ const PromoConfirmMail = async (res_id, email, user_name) => {
 
 const PromoEmail = async () => {
     var now_date = dateFormat(new Date(), "dd-mm");
-    var sql = `SELECT a.id, CONCAT(a.first_name, ' ', a.last_name) as name, 
+    var sql = `SELECT a.id, a.restaurant_id, CONCAT(a.first_name, ' ', a.last_name) as name, a.email as user_email,
         date_format(date(a.birth_dt - INTERVAL 14 DAY), "%d-%m") as bd_dt,
         date_format(date(a.anniversary_dt - INTERVAL 14 DAY), "%d-%m") as ani_dt,
         a.birth_dt, a.anniversary_dt, b.restaurant_name, b.contact_name, b.phone_no, b.email, b.addr_line1 as address, c.mailing_email_subject mail_subj, c.mailing_email_body mail_body, d.url
         FROM td_promotions a, td_contacts b, md_promotion_restaurant c, md_url d
         WHERE a.restaurant_id=b.id
         AND a.restaurant_id=c.restaurant_id
-        AND a.restaurant_id=d.restaurant_id`;
+        AND a.restaurant_id=d.restaurant_id
+        AND (date_format(date(a.birth_dt - INTERVAL 14 DAY), "%d-%m") = "${now_date}"
+        OR date_format(date(a.anniversary_dt - INTERVAL 14 DAY), "%d-%m") = "${now_date}")`;
+    // console.log({ sql });
     var data = await F_Select(sql);
     if (data.msg.length > 0) {
-        data.msg.forEach(dt => {
+        data.msg.forEach(async dt => {
             var mail_body = dt.mail_body;
-            var bd_greet = dt.bd_dt == now_date ? 'Happy Birthday' : '',
-                ani_greet = dt.ani_dt == now_date ? 'Happy Anniversary' : '',
-                greet = bd_greet != '' & ani_greet != '' ? 'Happy Birthday & Happy Anniversary' : (bd_greet != '' ? bd_greet : ani_greet);
+            var bd_greet = dt.bd_dt == now_date ? 'Birthday' : '',
+                ani_greet = dt.ani_dt == now_date ? 'Anniversary' : '',
+                greet = bd_greet != '' & ani_greet != '' ? 'Birthday & Anniversary' : (bd_greet != '' ? bd_greet : ani_greet),
+                res_email = dt.email,
+                user_email = dt.user_email;
+            // console.log(greet);
+            // var body = mail_body.replace('[User Name]!', dt.name).replace('[Birthday/Anniversary]!', greet).replace('[Birthday/Anniversary]!', greet).replace("[Restaurant's Contact Name]!", dt.contact_name).replace('[Name of Restaurant]!', dt.restaurant_name).replace('[Address]!', dt.address).replace('[Phone]!', dt.phone_no).replace('[Email]!', dt.email).replace('[Menu Url]!', dt.url);
+            var body = mail_body.split("[User Name]!").join(dt.name)
+            body = body.split("[Birthday/Anniversary]!").join(greet)
+            body = body.split("[Restaurant's Contact Name]!").join(dt.contact_name)
+            body = body.split("[Name of Restaurant]!").join(dt.restaurant_name)
+            body = body.split("[Address]!").join(dt.address)
+            body = body.split("[Phone]!").join(dt.phone_no)
+            body = body.split("[Email]!").join(dt.email)
+            body = body.split("[Menu Url]!").join(dt.url)
+            var mail_subj = dt.mail_subj
+            var subj = mail_subj.split("[Birthday/Anniversary]!").join(greet)
+            subj = subj.split("[Name of Restaurant]!").join(dt.restaurant_name)
+            var logo_sql = `SELECT restaurant_id, logo_path, logo_url FROM td_logo WHERE restaurant_id = ${dt.restaurant_id}`;
+            var logo_dt = await F_Select(logo_sql),
+                logo = logo_dt.msg[0].logo_path;
+            // FOR LOCAL
+            var transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'synergicbbps@gmail.com',
+                    pass: 'Signature@123'
+                }
+            });
 
-            var body = mail_body.replace('[User Name]!', dt.name).replace('[Birthday/Anniversary]!', greet).replace('[Birthday/Anniversary]!', greet).replace("[Restaurant's Contact Name]!", dt.contact_name).replace('[Name of Restaurant]!', dt.restaurant_name).replace('[Address]!', dt.address).replace('[Phone]!', dt.phone_no).replace('[Email]!', dt.email).replace('[Menu Url]!', dt.url);
-            console.log(body);
+            // FOR SERVER
+            // var transporter = nodemailer.createTransport({
+            //     //pool: true,
+            //     host: 'webmail.shoplocal-lagunabeach.com',
+            //     port: 25,
+            //     secure: false,
+            //     auth: {
+            //         user: 'admin@shoplocal-lagunabeach.com',
+            //         pass: 'dY786#lw!Laguna'
+            //     },
+            //     tls: {
+            //         // do not fail on invalid certs
+            //         rejectUnauthorized: false
+            //     }
+            // });
+
+            var mailOptions = {
+                from: res_email,
+                to: user_email,
+                subject: subj,
+                html: '<!DOCTYPE html>'
+                    + '<html>'
+                    + '<head>'
+                    + '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />'
+                    + '<title>ShopLocal</title>'
+                    + '<style type="text/css">'
+                    + 'body{margin:0; padding:0; font-family:14px; font-family:Arial, Helvetica, sans-serif;}'
+                    + '</style>'
+                    + '</head>'
+                    + '<body>'
+                    + '<div class="sectionArea" style="max-width:750px; width:100%; margin:2% auto 2% auto; padding:15px; background:#faf9f9; border-radius:15px;border: #ececec solid 1px;">'
+                    + '<table width="100%" border="0" cellspacing="0" cellpadding="0">'
+                    + '<tr>'
+                    + '<td align="left" valign="top" class="logoArea" style="padding:0 0 25px 0; text-align:center;"><img src="https://lagunaapi.shoplocal-lagunabeach.com/' + logo + '" width="402" height="300" alt="" style="max-width:190px; width:100%; height:auto; margin:0 auto;"></td>'
+                    + '</tr>'
+                    + '<tr>'
+                    + '<td align="left" valign="top">'
+                    // + '<h2 style="font-size:18px; font-weight:700; font-family:Arial, Helvetica, sans-serif;">Hi ' + contact_name + ',</h2>'
+                    + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">' + body + '</p>'
+                    // + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:19px; padding-bottom:15px; margin:0;"><strong>Your Sincerely</strong>,<br>'
+                    // + res_contact_name + '<br>'
+                    // + res_name + '</p>'
+                    + '</td>'
+                    + '</tr>'
+                    + '</table>'
+                    + '</div>'
+                    + '</body>'
+                    + '</html>'
+            };
+            transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                    console.log(error);
+                    data = { suc: 0, msg: JSON.stringify(error) };
+                } else {
+                    console.log('Email sent: ' + info.response);
+                    data = { suc: 1, msg: 'Email sent: ' + info.response };
+                }
+            });
+            // console.log(body);
         })
     }
     // var user_name = data.msg[0].

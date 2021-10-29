@@ -156,4 +156,19 @@ const UpdateApproval = (flag, res_id) => {
     })
 }
 
-module.exports = { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, CheckData };
+const F_Delete = (tb_name, whr) => {
+    let sql = `DELETE FROM ${tb_name} ${whr}`;
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err, lastId) => {
+            if (err) {
+                console.log(err);
+                data = { suc: 0, msg: JSON.stringify(err) }
+            } else {
+                data = { suc: 1, msg: 'Successfully Deleted !!' };
+            }
+            resolve(data);
+        })
+    })
+}
+
+module.exports = { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, CheckData, F_Delete };

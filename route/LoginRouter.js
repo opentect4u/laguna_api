@@ -1,6 +1,6 @@
 const express = require('express');
 const { CheckData } = require('../modules/AdminModule');
-const { Login } = require('../modules/LoginModule');
+const { Login, UpdateUser, UpdatePassword } = require('../modules/LoginModule');
 const { F_Select } = require('../modules/MenuSetupModule');
 const LogRouter = express.Router();
 
@@ -45,6 +45,18 @@ LogRouter.get('/check_active_status', async (req, res) => {
     let sql = `SELECT * FROM md_url WHERE restaurant_id = ${res_id}`;
     var data = await F_Select(sql);
     res.send(data);
+})
+
+LogRouter.post('/update_user', async (req, res) => {
+    var data = req.body;
+    var dt = await UpdateUser(data);
+    res.send(dt);
+})
+
+LogRouter.post('/update_password', async (req, res) => {
+    var data = req.body;
+    var dt = await UpdatePassword(data);
+    res.send(dt);
 })
 
 module.exports = { LogRouter };

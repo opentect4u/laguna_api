@@ -1,7 +1,7 @@
 const express = require('express');
 const AdmZip = require('adm-zip');
 const fs = require('fs');
-const { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval } = require('../modules/AdminModule');
+const { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, F_Delete } = require('../modules/AdminModule');
 const { F_Select } = require('../modules/MenuSetupModule');
 const AdmRouter = express.Router();
 
@@ -119,6 +119,30 @@ AdmRouter.get('/download_cov', async (req, res) => {
             // })
         }
     })
+})
+
+AdmRouter.get('/delete_sec', async (req, res) => {
+    var id = req.query.id,
+        db_name = 'md_section',
+        whr = `WHERE id = ${id}`;
+    var data = await F_Delete(db_name, whr);
+    res.send(data);
+})
+
+AdmRouter.get('/delete_item', async (req, res) => {
+    var id = req.query.id,
+        db_name = 'md_items',
+        whr = `WHERE id = ${id}`;
+    var data = await F_Delete(db_name, whr);
+    res.send(data);
+})
+
+AdmRouter.get('/delete_price_desc', async (req, res) => {
+    var id = req.query.id,
+        db_name = 'md_item_description',
+        whr = `WHERE id = ${id}`;
+    var data = await F_Delete(db_name, whr);
+    res.send(data);
 })
 
 module.exports = { AdmRouter };

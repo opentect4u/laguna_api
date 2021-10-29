@@ -1,7 +1,7 @@
 const express = require('express');
 const { OrderEmail, PayEmail } = require('../modules/EmailModule');
 const { F_Select } = require('../modules/MenuSetupModule');
-const { ResRegistration, EmailCheck, OrderSave, PaySave, MobileCheck } = require('../modules/RegisterModule');
+const { ResRegistration, EmailCheck, OrderSave, PaySave, MobileCheck, UpdatePackage, UpdateProd, UpdatePay } = require('../modules/RegisterModule');
 const RegRouter = express.Router();
 
 RegRouter.post('/registration', async (req, res) => {
@@ -57,6 +57,24 @@ RegRouter.get('/pay_check', async (req, res) => {
     let res_id = req.query.id;
     let sql = `SELECT IF(payment_flag = 'Y', 1, 0) as pay_flag FROM td_order_items WHERE restaurant_id = ${res_id}`;
     var dt = await F_Select(sql);
+    res.send(dt);
+})
+
+RegRouter.post('/update_pack', async (req, res) => {
+    var data = req.body;
+    var dt = await UpdatePackage(data);
+    res.send(dt);
+})
+
+RegRouter.post('/update_prod', async (req, res) => {
+    var data = req.body;
+    var dt = await UpdateProd(data);
+    res.send(dt);
+})
+
+RegRouter.post('/update_pay', async (req, res) => {
+    var data = req.body;
+    var dt = await UpdatePay(data);
     res.send(dt);
 })
 

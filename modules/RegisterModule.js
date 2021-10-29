@@ -222,4 +222,65 @@ const SaveUrl = (id, data) => {
     })
 }
 
-module.exports = { ResRegistration, EmailCheck, OrderSave, PaySave, MobileCheck };
+const UpdatePackage = (data) => {
+    var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
+    var sql = `UPDATE td_order_items SET package_id = "${data.package}", modified_by = "${data.email}", modified_dt = "${datetime}" WHERE restaurant_id = "${data.res_id}"`;
+
+    // sql = `UPDATE td_order_items SET package_id = "${data.package}", birth_calendar_flag = "${data.birthday}", event_calendar = "${data.event}", table_top_6 = '${tabletop}',
+    //     table_top_7 = '${wall_mount1}', table_top_8 = "${wall_mount2}", window_cling_9 = "${window}", modified_by = "${data.email}", modified_dt = "${datetime}" WHERE restaurant_id = "${data.res_id}"`;
+
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err, result) => {
+            if (err) {
+                console.log(err);
+                data = { suc: 0, msg: JSON.stringify(err) };
+            }
+            else {
+                data = { suc: 1, msg: 'Successfully Inserted !!' };
+            }
+            resolve(data);
+        })
+    })
+}
+
+const UpdateProd = (data) => {
+    var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
+    var tabletop = data.tabletop > 0 ? data.tabletop : 0,
+        wall_mount1 = data.wall_mount1 > 0 ? data.wall_mount1 : 0,
+        wall_mount2 = data.wall_mount2 > 0 ? data.wall_mount2 : 0,
+        window = data.window > 0 ? data.window : 0;
+    // var sql = `UPDATE td_order_items SET package_id = "${data.package}", modified_by = "${data.email}", modified_dt = "${datetime}" WHERE restaurant_id = "${data.res_id}"`;
+
+    sql = `UPDATE td_order_items SET birth_calendar_flag = "${data.birthday}", event_calendar = "${data.event}", table_top_6 = '${tabletop}',
+        table_top_7 = '${wall_mount1}', table_top_8 = "${wall_mount2}", window_cling_9 = "${window}", modified_by = "${data.email}", modified_dt = "${datetime}" WHERE restaurant_id = "${data.res_id}"`;
+
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err, result) => {
+            if (err) {
+                console.log(err);
+                data = { suc: 0, msg: JSON.stringify(err) };
+            }
+            else {
+                data = { suc: 1, msg: 'Successfully Inserted !!' };
+            }
+            resolve(data);
+        })
+    })
+}
+
+const UpdatePay = (data) => {
+    var sql = `UPDATE md_url SET approval_flag = "U" WHERE restaurant_id = "${data.res_id}"`;
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err, lastId) => {
+            if (err) {
+                console.log(err);
+                data = { suc: 0, msg: JSON.stringify(err) };
+            } else {
+                data = { suc: 1, msg: 'Inserted Successfully !!' };
+            }
+            resolve(data)
+        })
+    })
+}
+
+module.exports = { ResRegistration, EmailCheck, OrderSave, PaySave, MobileCheck, UpdatePackage, UpdateProd, UpdatePay };
