@@ -1,17 +1,20 @@
 const express = require('express');
-const { InsertCalender } = require('../modules/CalenderModule');
+const { InsertCalender, ApproveCal } = require('../modules/CalenderModule');
 const { F_Select } = require('../modules/MenuSetupModule');
 const CalenderRouter = express.Router();
 
 CalenderRouter.get('/calender_dtls', async (req, res) => {
     var res_id = req.query.id,
         sql = '',
-        data = '';
-    // if (res_id > 0) {
-    sql = `SELECT * FROM td_calendar WHERE restaurant_id = ${res_id}`;
-    // } else {
-    //     sql = `SELECT * FROM md_calender`;
-    // }
+        data = '',
+        flag = req.query.flag;
+    if (flag == 1) {
+        sql = `SELECT * FROM td_calendar WHERE restaurant_id = ${res_id} AND approval_flag = 'Y' AND user_type IN('R', 'A')`;
+    } else if (flag == 0) {
+        sql = `SELECT * FROM td_calendar WHERE restaurant_id = ${res_id} AND user_type IN('U')`;
+    } else {
+        sql = `SELECT * FROM td_calendar WHERE restaurant_id = ${res_id} AND approval_flag = 'Y' AND user_type IN('R', 'A', 'U')`;
+    }
     data = await F_Select(sql);
     res.send(data);
 })
@@ -34,10 +37,16 @@ CalenderRouter.get('/get_res_dtls', async (req, res) => {
     res.send(data);
 })
 
-CalenderRouter.post('/calender_dtls', async (req, res) => {
+CalenderRouter.post('/approve_cal', async (req, res) => {
     var data = req.body;
-    var dt = await InsertCalender(data);
+    var dt = await ApproveCal(data);
     res.send(dt);
 })
+
+// CalenderRouter.post('/calender_dtls', async (req, res) => {
+//     var data = req.body;
+//     var dt = await InsertCalender(data);
+//     res.send(dt);
+// })
 
 module.exports = { CalenderRouter }

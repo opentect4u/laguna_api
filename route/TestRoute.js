@@ -5,6 +5,7 @@ const { MenuImageSave, SectionImageSave, OtherImageSave, MonthDateSave, LogoSave
 const TestRouter = express.Router();
 const db = require('../core/db');
 const { SaveSpecialMenuImg, SpecialMonthDateSave } = require('../modules/SpecialModule');
+const { InsertCalender } = require('../modules/CalenderModule');
 
 TestRouter.use(upload());
 
@@ -476,5 +477,36 @@ const UploadSpecialMenu = async (menu_img, data) => {
         await SaveSpecialMenuImg(data, file_path)
     }
 }
+
+TestRouter.post('/calender_dtls', async (req, res) => {
+    var data = req.body,
+        filename = '',
+        response = '';
+    var img = req.files ? (req.files.img ? req.files.img : null) : null;
+    if (img) {
+        filename = data.res_id + '_calender_' + img.name;
+
+        img.mv('uploads/' + filename, async (err) => {
+            if (err) {
+                console.log(`${filename} not uploaded`);
+            } else {
+                console.log(`Successfully ${filename} uploaded`);
+                if (await InsertCalender(data, filename)) {
+                    response = { suc: 1, msg: 'Successfully Inserted !!' };
+                } else {
+                    response = { suc: 0, msg: 'Not Inserted !!' }
+                }
+                // await SaveSpecialMenuImg(data, filename);
+            }
+        })
+    } else {
+        if (await InsertCalender(data, filename)) {
+            response = { suc: 1, msg: 'Successfully Inserted !!' };
+        } else {
+            response = { suc: 0, msg: 'Not Inserted !!' }
+        }
+    }
+    res.send(response);
+})
 
 module.exports = { TestRouter, UploadLogo };

@@ -188,7 +188,7 @@ const SaveSpecialCatImg = async (data) => {
     var sql = '',
         res = '',
         in_desc_val = data.menu_desc ? data.menu_desc : null,
-        up_desc = data.menu_desc ? `, menu_desc = "${data.menu_desc}"` : '';
+        up_desc = data.menu_desc ? `, menu_desc = '${data.menu_desc}'` : '';
     var chk_sql = `SELECT count(id) chk_dt FROM td_special_data WHERE restaurant_id = "${data.restaurant_id}" AND menu_id = "${data.menu_id}"`;
     var chk_dt = await F_Select(chk_sql);
     if (chk_dt.msg[0].chk_dt > 0) {
