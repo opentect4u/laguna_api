@@ -1,7 +1,7 @@
 const express = require('express');
 const AdmZip = require('adm-zip');
 const fs = require('fs');
-const { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, F_Delete } = require('../modules/AdminModule');
+const { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, F_Delete, SaveEmailBody } = require('../modules/AdminModule');
 const { F_Select } = require('../modules/MenuSetupModule');
 const AdmRouter = express.Router();
 
@@ -142,6 +142,26 @@ AdmRouter.get('/delete_price_desc', async (req, res) => {
         db_name = 'md_item_description',
         whr = `WHERE id = ${id}`;
     var data = await F_Delete(db_name, whr);
+    res.send(data);
+})
+
+AdmRouter.post('/email_body', async (req, res) => {
+    var body = req.body;
+    var data = await SaveEmailBody(body);
+    res.send(data);
+})
+
+AdmRouter.get('/email_body', async (req, res) => {
+    var id = req.query.id;
+    var whr = id > 0 ? `AND a.email_type_id = ${id}` : '';
+    var sql = `SELECT a.* FROM md_config_email a, md_email_type b WHERE a.email_type_id=b.id ${whr}`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
+AdmRouter.get('/get_email_type', async (req, res) => {
+    var sql = `SELECT * FROM md_email_type`;
+    var data = await F_Select(sql);
     res.send(data);
 })
 

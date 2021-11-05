@@ -1,5 +1,6 @@
 const db = require('../core/db');
 const dateFormat = require('dateformat');
+const { F_Select } = require('./MenuSetupModule');
 var data = '';
 
 const GetPackageData = (data) => {
@@ -171,4 +172,29 @@ const F_Delete = (tb_name, whr) => {
     })
 }
 
-module.exports = { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, CheckData, F_Delete };
+const SaveEmailBody = async (data) => {
+    var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),
+        sql = '';
+    let chk_sql = `SELECT COUNT(id) as cunt_dt FROM md_config_email WHERE email_type_id = ${data.email_type}`;
+    var chk_dt = await F_Select(chk_sql);
+    if (chk_dt.msg[0].cunt_dt > 0) {
+        sql = `UPDATE md_config_email SET email_body = "${data.body}", modified_by = ${data.user}, modified_dt = "${datetime}"
+        WHERE email_type_id = ${data.email_type}`;
+    } else {
+        sql = `INSERT INTO md_config_email (email_type_id, email_body, created_by, created_dt) VALUES 
+        ("${data.body}", ${data.email_type}, "${data.user}", "${datetime}")`
+    }
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err) => {
+            if (err) {
+                console.log(err);
+                data = { suc: 0, msg: JSON.stringify(err) }
+            } else {
+                data = { suc: 1, msg: 'Successfully Inserted !!' };
+            }
+            resolve(data);
+        })
+    })
+}
+
+module.exports = { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, CheckData, F_Delete, SaveEmailBody };
