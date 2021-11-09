@@ -83,7 +83,8 @@ const CheckMenu = (res_id, st_time, end_time, date, menu_id) => {
                 AND a.menu_id=e.menu_id AND a.restaurant_id=e.restaurant_id
                 AND a.restaurant_id = "${res_id}"
                 AND e.start_time <= '${st_time}'
-                AND e.end_time >= '${end_time}' ${whr} ${menu_whr}
+                AND e.end_time >= '${end_time}'
+                AND d.restaurant_id = 0 ${whr} ${menu_whr}
                 GROUP BY a.menu_id
                 ORDER BY a.menu_id`;
     return new Promise((resolve, reject) => {
@@ -99,7 +100,7 @@ const CheckMenu = (res_id, st_time, end_time, date, menu_id) => {
     })
 }
 
-const MenuData = (res_id, st_time, end_time, menu_id, date, greet, menu_active_flag, replace_menu_id, reg_menu_flag, sp_st_time, sp_end_time) => {
+const MenuData = (res_id, st_time, end_time, menu_id, date, greet, menu_active_flag, replace_menu_id, reg_menu_flag, sp_st_time, sp_end_time, more_menu_flag) => {
     var dat = {},
         sp_menu_sql = '',
         sp_menu = '',
@@ -108,13 +109,15 @@ const MenuData = (res_id, st_time, end_time, menu_id, date, greet, menu_active_f
     var whr_menu = menu_id > 0 ? `AND a.menu_id = "${menu_id}"` : '';
     var whr_dt = date > 0 ? `AND e.month_day = "${date}"` : '';
     let sec_sql = `SELECT a.id, a.menu_id, a.section_id, c.section_img, c.restaurant_id, c.section_name, e.start_time, e.end_time
-    FROM md_item_description a, md_section c, td_date_time e
+    FROM md_item_description a, md_section c, md_menu d, td_date_time e
     WHERE a.section_id = c.id
+    AND a.menu_id = d.id
     AND a.menu_id=e.menu_id
 	AND a.restaurant_id=e.restaurant_id
     AND a.restaurant_id = "${res_id}"
     AND e.start_time <= '${st_time}'
-    AND e.end_time >= '${end_time}' ${whr_menu} ${whr_dt}
+    AND e.end_time >= '${end_time}' 
+    AND d.restaurant_id = 0 ${whr_menu} ${whr_dt}
     GROUP BY c.id
     ORDER BY c.id`;
     console.log(sec_sql);
@@ -132,7 +135,7 @@ const MenuData = (res_id, st_time, end_time, menu_id, date, greet, menu_active_f
                 }
                 var menu_id = result.length > 0 ? result[0].menu_id : 0;
                 // console.log(dat);
-                let oth_sql = `SELECT * FROM td_other_image WHERE restaurant_id = "${res_id}" AND menu_id = "${menu_id}"`;
+                let oth_sql = `SELECT a.* FROM td_other_image a, md_menu b WHERE a.menu_id=b.id AND a.restaurant_id = "${res_id}" AND a.menu_id = "${menu_id}" AND b.restaurant_id = 0`;
                 let oth_data = await F_Select(oth_sql)
                 let menu_check = await CheckMenu(res_id, st_time, end_time, date, null);
                 let cov_img = oth_data.msg.length > 0 ? oth_data.msg[0].cover_page_img : '',
@@ -156,7 +159,13 @@ const MenuData = (res_id, st_time, end_time, menu_id, date, greet, menu_active_f
                     promo_dt = '';
                 }
                 // console.log(dat);
-                data = { suc: 1, msg: 'Success', res: dat, cov_img: cov_img, top_img: top_img, menu_check: menu_check.msg, len: sec_sql, dt: oth_data, greet: greet, menu_active_flag, reg_menu_flag, sp_menu: sp_menu, promo_flag: promo_ckh, promo_dt };
+                // MORE MENU CHECK AND DATA //
+                var more_menu_name = '';
+                if (more_menu_flag != 'N') {
+                    more_menu_name = await MoreMenuList(res_id, date, st_time);
+                }
+                // END //
+                data = { suc: 1, msg: 'Success', res: dat, cov_img: cov_img, top_img: top_img, menu_check: menu_check.msg, len: sec_sql, dt: oth_data, greet: greet, menu_active_flag, reg_menu_flag, sp_menu: sp_menu, promo_flag: promo_ckh, promo_dt, more_flag: more_menu_flag, more_menu: more_menu_name };
             }
             // console.log(dat);
             resolve(data)
@@ -188,6 +197,29 @@ const CheckPromotion = async (res_id, date, menu_id) => {
 
     return new Promise((resolve, reject) => {
         resolve(promo_flag);
+    })
+}
+
+const MoreMenuList = async (res_id, date, curr_time) => {
+    var result = '';
+    return new Promise(async (resolve, reject) => {
+        var chk = `SELECT b.id menu_id, b.menu_description menu_name, a.start_time, a.end_time
+            FROM td_date_time a, md_menu b
+            WHERE a.menu_id=b.id
+            AND a.restaurant_id = ${res_id}
+            AND b.restaurant_id = ${res_id}
+            AND a.month_day = ${date}
+            AND a.start_time <= "${curr_time}"
+            AND a.end_time >= "${curr_time}"`;
+        // console.log(chk);
+        var checking_dt = await F_Select(chk);
+        if (checking_dt.msg.length > 0) {
+            result = checking_dt.msg;
+        } else {
+            result = '';
+        }
+        // res.send(result);
+        resolve(result);
     })
 }
 

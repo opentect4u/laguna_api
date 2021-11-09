@@ -124,6 +124,10 @@ MenuRouter.get('/menu_data', async (req, res) => {
             }
         }
     }
+    // END //
+    // CHECK MORE MENU OPERATION //
+    var more_menu_flag = await CheckMoreMenu(res_id, menu_date, curr_time);
+    // END //
 
     // CHECK CURRENT TIME WITH START TIME AND END TIME //
     if (curr_time >= morning_st && curr_time <= morning_end) {
@@ -138,7 +142,7 @@ MenuRouter.get('/menu_data', async (req, res) => {
     }
 
     // FETCH RESULT FROM MENUMODEL.JS MENUDATA FUNCTION //
-    var result = await MenuData(res_id, cu_st_time = curr_time, cu_end_time = curr_time, menu_id = 0, menu_date, greet, menu_active_flag, replace_menu_id, reg_menu_flag, sp_st_time = st_time, sp_end_time = end_time);
+    var result = await MenuData(res_id, cu_st_time = curr_time, cu_end_time = curr_time, menu_id = 0, menu_date, greet, menu_active_flag, replace_menu_id, reg_menu_flag, sp_st_time = st_time, sp_end_time = end_time, more_menu_flag);
     res.send(result);
 })
 
@@ -193,6 +197,36 @@ MenuRouter.get('/check_special_overlap', async (req, res) => {
     }
     res.send(ovl_dt);
 })
+
+const CheckMoreMenu = async (res_id, date, curr_time) => {
+    var result = 'N';
+    var chk_sql = `SELECT COUNT(id) cunt_dt FROM td_order_items WHERE restaurant_id = ${res_id} AND package_id = 3`;
+    var chk_dt = await F_Select(chk_sql);
+    return new Promise(async (resolve, reject) => {
+        if (chk_dt.msg[0].cunt_dt > 0) {
+            var chk = `SELECT COUNT(a.id) as chk 
+            FROM td_date_time a, md_menu b
+            WHERE a.menu_id=b.id
+            AND a.restaurant_id = ${res_id}
+            AND b.restaurant_id = ${res_id}
+            AND a.month_day = ${date}
+            AND a.start_time <= "${curr_time}"
+            AND a.end_time >= "${curr_time}"`;
+            // console.log(chk);
+            var checking_dt = await F_Select(chk);
+            if (checking_dt.msg[0].chk > 0) {
+                result = 'Y';
+            } else {
+                result = 'N';
+            }
+        } else {
+            result = 'N';
+        }
+        // res.send(result);
+        resolve(result);
+    })
+    // if(chk_dt.msg)
+}
 
 
 module.exports = { MenuRouter }
