@@ -197,4 +197,48 @@ const SaveEmailBody = async (data) => {
     })
 }
 
-module.exports = { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, CheckData, F_Delete, SaveEmailBody };
+const SaveMenuInfo = (data) => {
+    var sql = '',
+        datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
+    if (data.id > 0) {
+        sql = `UPDATE md_menu SET info = "${data.info}", modified_by = '${data.user}', modified_dt = "${datetime}" WHERE id = ${data.id}`;
+    }
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err) => {
+            if (err) {
+                console.log(err);
+                data = { suc: 0, msg: JSON.stringify(err) }
+            } else {
+                data = { suc: 1, msg: 'Successfully Inserted !!' };
+            }
+            resolve(data);
+        })
+    })
+}
+
+const ConfigMenu = async (data) => {
+    let chk_sql = `SELECT id FROM md_config_menu`;
+    var chk_dt = await F_Select(chk_sql);
+    var id = chk_dt.msg.length > 0 ? chk_dt.msg[0].id : 0,
+        sql = '',
+        res = '';
+    if (chk_dt.msg.length > 0) {
+        sql = `UPDATE md_config_menu SET footer_color = "${data.foo_col}", footer_content = '${data.foo_con}', text_color = "${data.txt_col}", greet_text_color = "${data.greet_col}" WHERE id = ${id}`
+    } else {
+        sql = `INSERT INTO md_config_menu (footer_color, footer_content, text_color, greet_text_color) 
+        VALUES ("${data.foo_col}", '${data.foo_con}', "${data.txt_col}", "${data.greet_col}")`
+    }
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err) => {
+            if (err) {
+                console.log(err);
+                res = { suc: 0, msg: JSON.stringify(err) }
+            } else {
+                res = { suc: 1, msg: 'Successfully Inserted !!' };
+            }
+            resolve(res);
+        })
+    })
+}
+
+module.exports = { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, CheckData, F_Delete, SaveEmailBody, SaveMenuInfo, ConfigMenu };

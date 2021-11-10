@@ -1,7 +1,7 @@
 const express = require('express');
 const AdmZip = require('adm-zip');
 const fs = require('fs');
-const { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, F_Delete, SaveEmailBody } = require('../modules/AdminModule');
+const { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, F_Delete, SaveEmailBody, SaveMenuInfo, ConfigMenu } = require('../modules/AdminModule');
 const { F_Select } = require('../modules/MenuSetupModule');
 const AdmRouter = express.Router();
 
@@ -163,6 +163,37 @@ AdmRouter.get('/get_email_type', async (req, res) => {
     var sql = `SELECT * FROM md_email_type`;
     var data = await F_Select(sql);
     res.send(data);
+})
+
+AdmRouter.get('/get_menu_dtls', async (req, res) => {
+    var id = req.query.id,
+        res_id = req.query.res_id;
+    // id = 0 -> REGULAR || 1 -> UNLIMITED || 2 -> CUSTOM || '' -> ALL //
+    // var whr = id == 0 ? `WHERE menu_flag = 'R'` : (id == 1 ? `WHERE menu_flag = 'U'` : (id == 2 ? `WHERE menu_flag = 'C'` : ''));
+
+    // var whr = id >= 0 ? `WHERE id = ${id} AND restaurant_id = 0` : `WHERE restaurant_id = ${res_id}`;
+    var whr = id > 0 ? `WHERE id = ${id} AND restaurant_id = 0` : `WHERE restaurant_id = 0`;
+    let sql = `SELECT * FROM md_menu ${whr}`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
+AdmRouter.post('/get_menu_dtls', async (req, res) => {
+    var data = req.body;
+    var dt = await SaveMenuInfo(data);
+    res.send(dt);
+})
+
+AdmRouter.get('/config_menu', async (req, res) => {
+    let sql = `SELECT * FROM md_config_menu`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
+AdmRouter.post('/config_menu', async (req, res) => {
+    var data = req.body;
+    var dt = await ConfigMenu(data);
+    res.send(dt);
 })
 
 module.exports = { AdmRouter };
