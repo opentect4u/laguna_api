@@ -19,6 +19,14 @@ CalenderRouter.get('/calender_dtls', async (req, res) => {
     res.send(data);
 })
 
+CalenderRouter.get('/get_cal', async (req, res) => {
+    var id = req.query.id,
+        whr = id > 0 ? `WHERE id = ${id}` : '';
+    var sql = `SELECT * FROM td_calendar ${whr}`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
 CalenderRouter.get('/check_calender', async (req, res) => {
     var res_id = req.query.id;
     let sql = `SELECT restaurant_id, event_calendar FROM td_order_items WHERE  restaurant_id = ${res_id}`;
