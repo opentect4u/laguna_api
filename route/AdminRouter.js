@@ -1,7 +1,7 @@
 const express = require('express');
 const AdmZip = require('adm-zip');
 const fs = require('fs');
-const { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, F_Delete, SaveEmailBody, SaveMenuInfo, ConfigMenu } = require('../modules/AdminModule');
+const { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, F_Delete, SaveEmailBody, SaveMenuInfo, ConfigMenu, DelRes, HelpTextSave, OtherText } = require('../modules/AdminModule');
 const { F_Select } = require('../modules/MenuSetupModule');
 const AdmRouter = express.Router();
 
@@ -193,6 +193,30 @@ AdmRouter.get('/config_menu', async (req, res) => {
 AdmRouter.post('/config_menu', async (req, res) => {
     var data = req.body;
     var dt = await ConfigMenu(data);
+    res.send(dt);
+})
+
+AdmRouter.get('/del_res', async (req, res) => {
+    var res_id = req.query.id;
+    var data = await DelRes(res_id);
+    res.send(data);
+})
+
+AdmRouter.post('/help_text', async (req, res) => {
+    var data = req.body;
+    var dt = await HelpTextSave(data);
+    res.send(dt);
+})
+
+AdmRouter.get('/help_text', async (req, res) => {
+    let sql = `SELECT id, menu_help, calender_help, qr_help, birthday_help, cantact_info_help FROM md_config_inst`;
+    var data = await F_Select(sql);
+    res.send(data);
+})
+
+AdmRouter.post('/other_text', async (req, res) => {
+    var data = req.body;
+    var dt = await OtherText(data);
     res.send(dt);
 })
 

@@ -74,9 +74,11 @@ const GetDataRes = (sec_id, res_id, st_time, end_time, menu_id, date) => {
 
 }
 
-const CheckMenu = (res_id, st_time, end_time, date, menu_id) => {
+const CheckMenu = (res_id, st_time, end_time, date, menu_id, flag) => {
     let menu_whr = menu_id ? `AND a.menu_id = "${menu_id}"` : '';
     let whr = date ? `AND e.month_day = "${date}"` : '';
+    var chk_preview = flag > 0 ? true : false;
+    var pre_whr = chk_preview ? `AND d.restaurant_id = 0` : '';
     var sql = `SELECT a.menu_id, d.menu_description, e.start_time, e.end_time
                 FROM md_item_description a, md_menu d, td_date_time e
                 WHERE a.menu_id = d.id
@@ -84,9 +86,10 @@ const CheckMenu = (res_id, st_time, end_time, date, menu_id) => {
                 AND a.restaurant_id = "${res_id}"
                 AND e.start_time <= '${st_time}'
                 AND e.end_time >= '${end_time}'
-                AND d.restaurant_id = 0 ${whr} ${menu_whr}
+                ${pre_whr} ${whr} ${menu_whr}
                 GROUP BY a.menu_id
                 ORDER BY a.menu_id`;
+    // console.log({ sql });
     return new Promise((resolve, reject) => {
         db.query(sql, (err, result) => {
             if (err) {

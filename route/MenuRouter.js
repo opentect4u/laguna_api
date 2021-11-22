@@ -176,8 +176,9 @@ MenuRouter.get('/check_menu', async (req, res) => {
     var res_id = req.query.id,
         st_time = req.query.st_time,
         end_time = req.query.end_time,
-        menu_id = req.query.menu_id;
-    var data = await CheckMenu(res_id, st_time, end_time, null, menu_id);
+        menu_id = req.query.menu_id,
+        flag = req.query.flag;
+    var data = await CheckMenu(res_id, st_time, end_time, null, menu_id, flag);
     res.send(data);
 })
 

@@ -228,4 +228,28 @@ const PromoSave = async (data) => {
     })
 }
 
-module.exports = { IntroSave, ConfEmailSave, PouUpSave, QuestionSave, MailingEmailSave, PromoImgSave, StatusSave, PromoSave };
+const OtherSave = async (data) => {
+    var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
+    var chk_sql = `SELECT id, COUNT(id) as cunt_dt FROM md_promotion_admin`;
+    var chk_dt = await F_Select(chk_sql);
+    var sql = '';
+    if (chk_dt.msg[0].cunt_dt > 0) {
+        sql = `UPDATE md_promotion_admin SET privacy = "${data.privacy}", authorization = "${data.auth}", back_color = "${data.back_color}", modified_by = "${data.user}", modified_at = "${datetime}" WHERE id = ${chk_dt.msg[0].id}`;
+    } else {
+        sql = `INSERT INTO md_promotion_admin (privacy, authorization, back_color, created_by, created_at)
+        VALUES ("${data.privacy}", "${data.auth}", "${data.back_color}", "${data.user}", "${datetime}")`;
+    }
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err, lastId) => {
+            if (err) {
+                console.log(err);
+                res = { suc: 0, msg: JSON.stringify(err) };
+            } else {
+                res = { suc: 1, msg: 'Inserted Successfully !!' };
+            }
+            resolve(res);
+        })
+    })
+}
+
+module.exports = { IntroSave, ConfEmailSave, PouUpSave, QuestionSave, MailingEmailSave, PromoImgSave, StatusSave, PromoSave, OtherSave };

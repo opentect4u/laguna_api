@@ -143,6 +143,23 @@ const ApproveMenu = async (data) => {
 }
 
 const SendAdminUnapproveMail = async (res_id, apr_flag, menu_list, desc) => {
+    console.log({ menu_list });
+    var v = '',
+        v1 = '';
+    for (let i = 0; i < menu_list.length; i++) {
+        if (menu_list[i].dt > 0) {
+            v = menu_list[i].dt;
+            if (v1 != '') {
+                v1 = v + ',' + v1;
+            } else {
+                v1 = v;
+            }
+        }
+    }
+    let menu_sql = `SELECT id, menu_description as menu_name FROM md_menu WHERE id IN(${v1})`;
+    var menu_dt = await F_Select(menu_sql);
+
+    console.log({ menu_dt: menu_dt.msg });
     let con_sql = `SELECT * FROM td_contacts WHERE id = "${res_id}"`;
     let con = await F_Select(con_sql);
     let con_name = con.msg[0].contact_name;
@@ -154,6 +171,15 @@ const SendAdminUnapproveMail = async (res_id, apr_flag, menu_list, desc) => {
         lun_chk = menu_list[1].dt > 0 ? 'checked="checked"' : "",
         din_chk = menu_list[2].dt > 0 ? 'checked="checked"' : "",
         bru_chk = menu_list[3].dt > 0 ? 'checked="checked"' : "";
+    var menu_chk_list = '<ul>';
+    menu_dt.msg.forEach(dt => {
+        console.log(dt.menu_name);
+        menu_chk_list = `${menu_chk_list} <li> ${dt.menu_name} </li>`;
+        // '<label class="container">' + dt.menu_name
+        // '<input type="checkbox" disabled>'
+    })
+    menu_chk_list = `${menu_chk_list} </ul>`;
+    // console.log({menu_chk_list});
     // spe_chk = menu_list[4].dt > 0 ? 'checked="checked"' : "";
     // console.log({ ab: menu_list[0].dt, brk_chk, lun_chk, din_chk });
     return new Promise(async (resolve, reject) => {
@@ -209,34 +235,34 @@ const SendAdminUnapproveMail = async (res_id, apr_flag, menu_list, desc) => {
                 + '<input type="text" id="rest" name="rest" value="' + res_name + '" readonly style="height: 22px; padding: 5px; font-size: 1rem; font-weight: 400; line-height: 1.5; color: #495057; background-color: #fff; background-clip: padding-box; border: 1px solid #ced4da; border-radius: .25rem; transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out; margin: 0 !important;"><br><br>'
                 + '<label for="contact">Name of person:</label>'
                 + '<input type="text" id="contact" name="contact" value="' + con_name + '" readonly style="height: 22px;padding: 5px;font-size: 1rem;font-weight: 400;line-height: 1.5;color: #495057;background-color: #fff;background-clip: padding-box;border: 1px solid #ced4da;border-radius: .25rem;transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;margin: 0 !important;"><br>'
-                + '<br>Please signify your approval or request an update of the Menu:<br><br>'
-                + '<input type="radio" id="html" name="fav_language" value="HTML" ' + app_chk + ' disabled>'
-                + '<label for="html">I have reviewed my MENU platform, and I APPROVE</label><br><br>'
-                + '<input type="radio" id="css" name="fav_language" value="CSS" ' + unap_chk + ' disabled>'
-                + '<label for="javascript">I have checked my MENU Platform, and would like to request an update:</label><br><br>'
-                + 'Which Menu/s require an update?<br><br>'
-                + '<label class="container">Breakfast'
-                + '<input type="checkbox" ' + brk_chk + ' disabled>'
-                + '<span class="checkmark"></span>'
-                + '</label>'
-                + '<label class="container">Lunch'
-                + '<input type="checkbox" ' + lun_chk + ' disabled>'
-                + '<span class="checkmark"></span>'
-                + '</label>'
-                + '<label class="container">Dinner'
-                + '<input type="checkbox" ' + din_chk + ' disabled>'
-                + '<span class="checkmark"></span>'
-                + '</label>'
-                + '<label class="container">Brunch'
-                + '<input type="checkbox" ' + bru_chk + ' disabled>'
-                + '<span class="checkmark"></span>'
-                + '</label>'
+                // + '<br>Please signify your approval or request an update of the Menu:<br><br>'
+                // + '<input type="radio" id="html" name="fav_language" value="HTML" ' + app_chk + ' disabled>'
+                // + '<label for="html">I have reviewed my MENU platform, and I APPROVE</label><br><br>'
+                // + '<input type="radio" id="css" name="fav_language" value="CSS" ' + unap_chk + ' disabled>'
+                + '<br><br><label for="javascript">I have checked my MENU Platform, and would like to request an update</label><br><br>'
+                + 'Menu(s) that require(s) an update<br>'
+                + menu_chk_list
+
+                // + '<span class="checkmark"></span>'
+                // + '</label>'
+                // + '<label class="container">Lunch'
+                // + '<input type="checkbox" ' + lun_chk + ' disabled>'
+                // + '<span class="checkmark"></span>'
+                // + '</label>'
+                // + '<label class="container">Dinner'
+                // + '<input type="checkbox" ' + din_chk + ' disabled>'
+                // + '<span class="checkmark"></span>'
+                // + '</label>'
+                // + '<label class="container">Brunch'
+                // + '<input type="checkbox" ' + bru_chk + ' disabled>'
+                // + '<span class="checkmark"></span>'
+                // + '</label>'
                 // + '<label class="container">Specials'
                 // + '<input type="checkbox" ' + spe_chk + ' disabled>'
                 // + '<span class="checkmark"></span>'
                 // + '</label>'
-                + '<br><br>'
-                + 'Please describe what requires updating for each Menu.<br> '
+                + '<br>'
+                + 'Description<br> '
                 + '<textarea rows="6" cols="60" maxlength="50" readonly style="height:120px; width: 100%;padding: .375rem .75rem;font-size: 1rem; box-sizing: border-box;font-weight: 400;line-height: 1.5;color: #495057;background-color: #fff;background-clip: padding-box;border: 1px solid #ced4da;border-radius: .25rem;transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;margin:15px 0 20px 0 !important;">' + desc + '</textarea>'
                 + '</form>'
                 + '</td>'
@@ -246,6 +272,7 @@ const SendAdminUnapproveMail = async (res_id, apr_flag, menu_list, desc) => {
                 + '</body>'
                 + '</html>'
         }
+        console.log(mailOptions.html);
         transporter.sendMail(mailOptions, function (error, info) {
             if (error) {
                 console.log(error);

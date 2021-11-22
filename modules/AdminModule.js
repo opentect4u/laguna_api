@@ -241,4 +241,91 @@ const ConfigMenu = async (data) => {
     })
 }
 
-module.exports = { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, CheckData, F_Delete, SaveEmailBody, SaveMenuInfo, ConfigMenu };
+const DelRes = (res_id) => {
+    let sql = `UPDATE td_users SET active_flag = 'N' WHERE restaurant_id = ${res_id}`;
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err) => {
+            if (err) {
+                console.log(err);
+                res = { suc: 0, msg: JSON.stringify(err) }
+            } else {
+                res = { suc: 1, msg: 'Successfully Deleted !!' };
+            }
+            resolve(res);
+        })
+    })
+}
+
+const HelpTextSave = async (data) => {
+    var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
+    let chk_sql = `SELECT id, count(id) as chk_cunt FROM md_config_inst`;
+    var chk_dt = await F_Select(chk_sql);
+    var sql = '';
+    if (chk_dt.msg[0].chk_cunt > 0) {
+        sql = `UPDATE md_config_inst SET menu_help = "${data.menu_help}", calender_help = "${data.cal_help}", qr_help = "${data.qr_help}", birthday_help = "${data.bir_help}", cantact_info_help = "${data.con_help}", modified_by = "${data.user}", modified_dt = "${datetime}" WHERE id = ${chk_dt.msg[0].id}`;
+    } else {
+        sql = `INSERT INTO md_config_inst (menu_help, calender_help, qr_help, birthday_help, cantact_info_help, created_by, created_dt) 
+        VALUES ("${data.menu_help}", "${data.cal_help}", "${data.qr_help}", "${data.bir_help}", "${data.con_help}", "${data.user}", "${datetime}")`
+    }
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err) => {
+            if (err) {
+                console.log(err);
+                res = { suc: 0, msg: JSON.stringify(err) }
+            } else {
+                res = { suc: 1, msg: 'Successfully Inserted !!' };
+            }
+            resolve(res);
+        })
+    })
+}
+
+const OtherText = async (data) => {
+    var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
+    let chk_sql = `SELECT id, count(id) as chk_cunt FROM md_config_inst`;
+    var chk_dt = await F_Select(chk_sql);
+    var sql = '';
+    if (chk_dt.msg[0].chk_cunt > 0) {
+        sql = `UPDATE md_config_inst SET birthday_body = "${data.bir_text}", event_body = "${data.event_text}", modified_by = "${data.user}", modified_dt = "${datetime}" WHERE id = ${chk_dt.msg[0].id}`;
+    } else {
+        sql = `INSERT INTO md_config_inst (birthday_body, event_body, created_by, created_dt)
+        VALUES ("${data.bir_text}", "${data.event_text}", "${data.user}", "${datetime}")`
+    }
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err) => {
+            if (err) {
+                console.log(err);
+                res = { suc: 0, msg: JSON.stringify(err) }
+            } else {
+                res = { suc: 1, msg: 'Successfully Inserted !!' };
+            }
+            resolve(res);
+        })
+    })
+}
+
+const DifImgSave = async (filename, user_name) => {
+    var datetime = dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss");
+    let chk_sql = `SELECT id, count(id) as chk_cunt FROM md_config_inst`;
+    var chk_dt = await F_Select(chk_sql);
+    var sql = '';
+    if (chk_dt.msg[0].chk_cunt > 0) {
+        sql = `UPDATE md_config_inst SET event_img = "${filename}", modified_by = "${user_name}", modified_dt = "${datetime}" WHERE id = ${chk_dt.msg[0].id}`;
+    } else {
+        sql = `INSERT INTO md_config_inst (event_img, created_by, created_dt)
+        VALUES ("${filename}", "${user_name}", "${datetime}")`
+    }
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err) => {
+            if (err) {
+                console.log(err);
+                res = { suc: 0, msg: JSON.stringify(err) }
+            } else {
+                res = { suc: 1, msg: 'Successfully Inserted !!' };
+            }
+            resolve(res);
+        })
+    })
+}
+
+module.exports = { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, CheckData, F_Delete, SaveEmailBody, SaveMenuInfo, ConfigMenu, DelRes, HelpTextSave, OtherText, DifImgSave };

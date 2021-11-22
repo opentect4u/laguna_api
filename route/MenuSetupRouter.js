@@ -97,7 +97,7 @@ MenuSetRouter.get('/section', async (req, res) => {
     let res_id = req.query.id;
     let menu_id = req.query.menu_id;
     let whr = menu_id > 0 ? `AND menu_id = "${menu_id}"` : ''
-    let sql = `SELECT * FROM md_section WHERE restaurant_id = "${res_id}" ${whr}`;
+    let sql = `SELECT a.*, b.menu_description menu_name FROM md_section a, md_menu b WHERE a.menu_id=b.id AND a.restaurant_id = "${res_id}" ${whr}`;
     var data = await F_Select(sql);
     res.send(data);
 })
@@ -112,8 +112,8 @@ MenuSetRouter.get('/items', async (req, res) => {
     let res_id = req.query.id;
     let menu_id = req.query.menu_id;
     let sec_id = req.query.sec_id;
-    let whr = menu_id > 0 && sec_id > 0 ? `AND menu_id = "${menu_id}" AND section_id = "${sec_id}"` : ''
-    let sql = `SELECT * FROM md_items WHERE restaurant_id = "${res_id}" ${whr}`;
+    let whr = menu_id > 0 && sec_id > 0 ? `AND a.menu_id = "${menu_id}" AND a.section_id = "${sec_id}"` : ''
+    let sql = `SELECT a.*, b.menu_description menu_name FROM md_items a, md_menu b WHERE a.menu_id=b.id AND a.restaurant_id = "${res_id}" ${whr}`;
     var data = await F_Select(sql);
     res.send(data);
 })
@@ -126,7 +126,7 @@ MenuSetRouter.post('/item_price', async (req, res) => {
 
 MenuSetRouter.get('/item_price', async (req, res) => {
     var res_id = req.query.id;
-    let sql = `SELECT a.*, b.item_name FROM md_item_description a, md_items b WHERE a.item_id=b.id AND a.restaurant_id = "${res_id}"`;
+    let sql = `SELECT a.*, b.item_name, c.menu_description menu_name FROM md_item_description a, md_items b, md_menu c WHERE a.item_id=b.id AND a.menu_id = c.id AND a.restaurant_id = "${res_id}"`;
     var data = await F_Select(sql);
     res.send(data);
 })
@@ -143,10 +143,11 @@ MenuSetRouter.get('/notice', async (req, res) => {
 MenuSetRouter.get('/res_details', async (req, res) => {
     var res_id = req.query.id;
     let whr = res_id > 0 ? `WHERE a.id = "${res_id}"` : '';
-    let sql = `SELECT a.*, c.setup_fee, c.monthly_fee, d.approval_flag FROM td_contacts a
+    let sql = `SELECT a.*, c.setup_fee, c.monthly_fee, d.approval_flag, e.name as country FROM td_contacts a
                 LEFT JOIN td_order_items b ON a.id=b.restaurant_id
                 LEFT JOIN md_package c ON b.package_id=c.pakage_name
-                LEFT JOIN md_url d ON a.id=d.restaurant_id ${whr}`;
+                LEFT JOIN md_url d ON a.id=d.restaurant_id
+                JOIN md_country e ON a.country = e.id ${whr}`;
     var data = await F_Select(sql);
     res.send(data);
 })
@@ -157,7 +158,8 @@ MenuSetRouter.get('/res_dtls', async (req, res) => {
     let sql = `SELECT a.*, c.setup_fee, c.monthly_fee, d.approval_flag FROM td_contacts a
                 JOIN td_order_items b ON a.id=b.restaurant_id
                 JOIN md_package c ON b.package_id=c.pakage_name
-                JOIN md_url d ON a.id=d.restaurant_id ${whr}`;
+                JOIN md_url d ON a.id=d.restaurant_id
+                JOIN td_users e ON a.id = e.restaurant_id AND e.active_flag = "Y" ${whr}`;
     var data = await F_Select(sql);
     res.send(data);
 })

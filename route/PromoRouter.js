@@ -1,6 +1,6 @@
 const express = require('express');
 const { F_Select } = require('../modules/MenuSetupModule');
-const { IntroSave, ConfEmailSave, PouUpSave, QuestionSave, MailingEmailSave, PromoImgSave, StatusSave, PromoSave } = require('../modules/PromoModule');
+const { IntroSave, ConfEmailSave, PouUpSave, QuestionSave, MailingEmailSave, PromoImgSave, StatusSave, PromoSave, OtherSave } = require('../modules/PromoModule');
 const PromoRouter = express.Router();
 
 PromoRouter.get('/adm_promo_dt', async (req, res) => {
@@ -61,6 +61,12 @@ PromoRouter.post('/status_save', async (req, res) => {
 PromoRouter.post('/promo_save', async (req, res) => {
     var data = req.body;
     var dt = await PromoSave(data);
+    res.send(dt);
+})
+
+PromoRouter.post('/promo_other_save', async (req, res) => {
+    var data = req.body;
+    var dt = await OtherSave(data);
     res.send(dt);
 })
 

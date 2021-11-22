@@ -1,11 +1,12 @@
 const express = require('express')
 const upload = require('express-fileupload')
 const fs = require('fs');
-const { MenuImageSave, SectionImageSave, OtherImageSave, MonthDateSave, LogoSave, SectionSave } = require('../modules/MenuSetupModule');
+const { MenuImageSave, SectionImageSave, OtherImageSave, MonthDateSave, LogoSave, SectionSave, F_Select } = require('../modules/MenuSetupModule');
 const TestRouter = express.Router();
 const db = require('../core/db');
 const { SaveSpecialMenuImg, SpecialMonthDateSave } = require('../modules/SpecialModule');
 const { InsertCalender } = require('../modules/CalenderModule');
+const { DifImgSave } = require('../modules/AdminModule');
 
 TestRouter.use(upload());
 
@@ -508,5 +509,140 @@ TestRouter.post('/calender_dtls', async (req, res) => {
     }
     res.send(response);
 })
+
+TestRouter.post('/dif_img_save', async (req, res) => {
+    var img_type = 'dif';
+    var dt = await difImgSave(req.body.dif_img, img_type, req.body);
+    res.send(dt);
+})
+
+const difImgSave = async (files, img_type, data) => {
+    var filename = '',
+        res = '';
+    if (files) {
+        // var filename = data.restaurant_id + '_' + data.menu_id + '_' + img_type + '_' + files.name;
+        // return new Promise(async (resolve, reject) => {
+        //     files.mv('uploads/' + filename, async (err) => {
+        //         if (err) {
+        //             console.log(`${filename} not uploaded`);
+        //         } else {
+        //             console.log(`Successfully ${filename} uploaded`);
+        //             dt = await UpdateOtherImg(`top_img_url = "${data.top_url}", top_image_img = "${filename}"`, `id = "${data.id}" AND restaurant_id = "${data.restaurant_id}"`, 'td_other_image');
+        //             resolve(dt);
+        //         }
+        //     })
+        // })
+        var buffer = files;
+        // var dt = buffer.split(';');
+        // var ext = dt[0].split('/')[1];
+        filename = img_type + '_' + data.filename;
+
+        // console.log(ext);
+        var buffer_dt = buffer.replace(/^data:image\/png;base64,/, "");
+        buffer_dt += buffer_dt.replace('+', ' ');
+        let binaer_dt = new Buffer(buffer_dt, 'base64').toString('binary');
+        return new Promise(async (resolve, reject) => {
+            fs.writeFile("uploads/" + filename, binaer_dt, "binary", async (err) => {
+                if (err) { console.log(err); res = { suc: 0, msg: "err" }; } // writes out file without error, but it's not a valid image
+                else {
+                    res = await DifImgSave(filename, data.user);
+                }
+                resolve(res);
+            });
+        })
+    } else {
+        return new Promise(async (resolve, reject) => {
+            res = { suc: 0, msg: "No File Selected !!" };
+            resolve(res);
+        })
+    }
+}
+
+TestRouter.post('/save_other_qr', async (req, res) => {
+    var data = req.body;
+    var flag = data.flag,
+        res_id = data.res_id,
+        field_name = flag == 0 ? "dynamic_img" : (flag == 1 ? "v_card_img" : "fun_directory_img"),
+        pre_name = flag == 0 ? "dynamic_qr" : (flag == 1 ? "v_card_qr" : "fun_directory_qr"),
+        img = req.files ? (req.files.img ? req.files.img : false) : false,
+        response = '';
+
+    // console.log({data, img});
+
+    // switch(flag){
+    //     case 0:
+    //         field_name = 'dynamic_img';
+    //         pre_name = 'dynamic_qr';
+    //         // response = await UploadOtherQr(res_id, pre_name, field_name, img);
+    //         // res.send(response);
+    //         break;
+    //     case 1:
+    //         field_name = 'v_card_img';
+    //         pre_name = 'v_card_qr';
+    //         // response = await UploadOtherQr(res_id, pre_name, field_name, img);
+    //         // res.send(response);
+    //         break;
+    //     case 2:
+    //         field_name = 'fun_directory_img';
+    //         pre_name = 'fun_directory_qr';
+    //         break;
+    // }
+    response = await UploadOtherQr(res_id, pre_name, field_name, img);
+    res.send(response);
+})
+
+const UploadOtherQr = (res_id, pre_name, field_name, img) => {
+    var res = '',
+        img_name = '';
+    if (img) {
+        img_name = res_id + '_' + pre_name + '_' + img.name;
+        console.log({ img_name });
+        return new Promise((resolve, reject) => {
+            img.mv('uploads/' + img_name, async (err) => {
+                if (err) {
+                    console.log(`${img_name} not uploaded`);
+                    res = { suc: 0, msg: 'File Not Uploaded' }
+                } else {
+                    console.log(`Successfully ${img_name} uploaded`);
+                    res = await SaveOtherQr(img_name, res_id, field_name);
+                    // await SectionImageSave(data, filename);
+                }
+                resolve(res);
+            })
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            res = { suc: 0, msg: 'File was empty' };
+            resolve(res);
+        })
+    }
+}
+
+const SaveOtherQr = async (filename, res_id, field_name) => {
+    let chk_sql = `SELECT COUNT(id) ck_dt, id FROM md_url WHERE restaurant_id = ${res_id}`;
+    var chk_dt = await F_Select(chk_sql),
+        id = chk_dt.msg[0].id,
+        res = '';
+    if (chk_dt.msg[0].ck_dt > 0) {
+        var sql = `UPDATE md_url SET ${field_name} = "${filename}" WHERE id = ${id}`;
+        console.log({ sql });
+        return new Promise((resolve, reject) => {
+            db.query(sql, (err, lastId) => {
+                if (err) {
+                    console.log(err);
+                    res = { suc: 0, msg: JSON.stringify(err) };
+                } else {
+                    res = { suc: 1, msg: "Inserted !!" }
+                }
+                resolve(res);
+            })
+        })
+    } else {
+        return new Promise((resolve, reject) => {
+            res = { suc: 0, msg: 'No URL AVAILABLE' };
+            resolve(res);
+        })
+    }
+}
 
 module.exports = { TestRouter, UploadLogo };

@@ -6,7 +6,7 @@ var data = '';
 
 const Login = async (data) => {
     // console.log(data);
-    var sql = `SELECT * FROM td_users WHERE email_id = "${data.uname}"`;
+    var sql = `SELECT * FROM td_users WHERE email_id = "${data.uname}" AND active_flag = "Y"`;
     return new Promise((resolve, reject) => {
         db.query(sql, async (err, result) => {
             if (err) {
