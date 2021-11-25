@@ -50,7 +50,7 @@ const PreviewMenu = (res_id, st_time, end_time, menu_id, date, menu_date) => {
 const GetDataRes = (sec_id, res_id, st_time, end_time, menu_id, date) => {
     var whr_menu = menu_id > 0 ? `AND a.menu_id = "${menu_id}"` : '';
     var whr_dt = date > 0 ? `AND e.month_day = "${date}"` : '';
-    var sql = `SELECT a.id, a.section_id, b.item_name, a.item_price, a.item_desc, a.item_note, e.start_time, e.end_time
+    var sql = `SELECT a.id, a.section_id, b.item_name, a.item_price, a.item_desc, a.item_note, a.note_color, e.start_time, e.end_time
                 FROM md_item_description a, md_items b, md_section c, md_menu d, td_date_time e
                 WHERE a.item_id=b.id
                 AND a.section_id = c.id
@@ -89,7 +89,6 @@ const CheckMenu = (res_id, st_time, end_time, date, menu_id, flag) => {
                 ${pre_whr} ${whr} ${menu_whr}
                 GROUP BY a.menu_id
                 ORDER BY a.menu_id`;
-    // console.log({ sql });
     return new Promise((resolve, reject) => {
         db.query(sql, (err, result) => {
             if (err) {
@@ -123,7 +122,6 @@ const MenuData = (res_id, st_time, end_time, menu_id, date, greet, menu_active_f
     AND d.restaurant_id = 0 ${whr_menu} ${whr_dt}
     GROUP BY c.id
     ORDER BY c.id`;
-    console.log(sec_sql);
     return new Promise((resolve, reject) => {
         db.query(sec_sql, async (err, result) => {
             if (err) {
@@ -140,7 +138,7 @@ const MenuData = (res_id, st_time, end_time, menu_id, date, greet, menu_active_f
                 // console.log(dat);
                 let oth_sql = `SELECT a.* FROM td_other_image a, md_menu b WHERE a.menu_id=b.id AND a.restaurant_id = "${res_id}" AND a.menu_id = "${menu_id}" AND b.restaurant_id = 0`;
                 let oth_data = await F_Select(oth_sql)
-                let menu_check = await CheckMenu(res_id, st_time, end_time, date, null);
+                let menu_check = await CheckMenu(res_id, st_time, end_time, date, null, 1);
                 let cov_img = oth_data.msg.length > 0 ? oth_data.msg[0].cover_page_img : '',
                     top_img = oth_data.msg.length > 0 ? oth_data.msg[0].top_image_img : '';
                 if (menu_active_flag != 'N') {
@@ -177,7 +175,6 @@ const MenuData = (res_id, st_time, end_time, menu_id, date, greet, menu_active_f
 }
 
 const CheckPromotion = async (res_id, date, menu_id) => {
-    menu_id = menu_id > 0 ? menu_id : '';
     var promo_flag = 'N';
     var chk_sql = `SELECT * FROM md_promotion_restaurant WHERE restaurant_id = ${res_id} AND status_id = '0'`;
     var chk_dt = await F_Select(chk_sql);
@@ -226,4 +223,58 @@ const MoreMenuList = async (res_id, date, curr_time) => {
     })
 }
 
-module.exports = { PreviewMenu, CheckMenu, MenuData };
+const AllMenu = (res_id) => {
+    var dat = {},
+        dt = {};
+    let sec_sql = `SELECT a.id, a.section_id, c.section_img, c.restaurant_id, c.section_name, e.start_time, e.end_time, d.menu_description menu_name
+        FROM md_item_description a, md_menu d, md_section c, td_date_time e
+        WHERE a.section_id = c.id
+        AND a.menu_id = d.id
+        AND a.menu_id=e.menu_id
+        AND a.restaurant_id = "${res_id}"
+        GROUP BY c.id
+        ORDER BY d.id, c.id`;
+    // console.log(sec_sql);
+    return new Promise((resolve, reject) => {
+        db.query(sec_sql, async (err, result) => {
+            if (err) {
+                console.log(err);
+                data = { suc: 0, msg: JSON.stringify(err) };
+            } else {
+                for (let i = 0; i < result.length; i++) {
+                    var res = await GetAllMenuItem(res_id, result[i].section_id);
+                    dat[result[i].section_name] = { res, sec_img: result[i].section_img };
+                    dt[result[i].menu_name] = dat;
+                    // dat[result[i].section_name] = ;
+                    // console.log(dat);
+                }
+                // console.log(dat);
+                data = { suc: 1, msg: 'Success', res: dt };
+                // console.log({ dat });
+            }
+            // console.log(dat);
+            resolve(data)
+        })
+    })
+}
+
+const GetAllMenuItem = (res_id, sec_id) => {
+    var sql = `SELECT a.id, a.section_id, b.item_name, a.item_price, a.item_desc, a.item_note, e.start_time, e.end_time, d.menu_description menu_name
+                FROM md_item_description a, md_items b, md_section c, md_menu d, td_date_time e
+                WHERE a.item_id=b.id
+                AND a.section_id = c.id
+                AND a.menu_id = d.id
+                AND a.menu_id=e.menu_id
+                AND a.restaurant_id = "${res_id}"
+                AND a.section_id = "${sec_id}"
+                GROUP BY a.id
+                ORDER BY a.section_id`;
+    // console.log({ sql });
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err, result) => {
+            resolve(result);
+        })
+    })
+}
+
+module.exports = { PreviewMenu, CheckMenu, MenuData, AllMenu };

@@ -7,6 +7,7 @@ const express = require('express'),
     cors = require("cors"),
     bcrypt = require('bcrypt'),
     port = process.env.PORT || 3000;
+// const dateFormat = require('dateformat');
 
 // USING CORS //
 app.use(cors());
@@ -69,7 +70,11 @@ app.get('/', async (req, res) => {
     var sum = '123';//a + b + c + d + e;
     var pwd = '$2b$10$SSokJhSzqi5bw5w.PR0eAu.AGE5qHVxwJfGaATBabs078KY5diGOm';//bcrypt.hashSync(sum, 10);
     // var random_num = Math.random().toString(36).substr(2);
-    console.log({ comp: await bcrypt.compare(pwd, sum) });
+    // console.log({ comp: await bcrypt.compare(pwd, sum) });
+    // var date = new Date(),
+    //     mod_hr = date.setMinutes(date.getMinutes() + 10),
+    //     n = dateFormat(mod_hr, "yyyy-MM-dd hh:mm:ss");
+    // console.log({ hr: n });
     res.send({ random_num: pwd, sum });
 })
 

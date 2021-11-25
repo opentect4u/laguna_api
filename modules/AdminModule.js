@@ -1,5 +1,6 @@
 const db = require('../core/db');
 const dateFormat = require('dateformat');
+var request = require('request');
 const { F_Select } = require('./MenuSetupModule');
 var data = '';
 
@@ -328,4 +329,56 @@ const DifImgSave = async (filename, user_name) => {
     })
 }
 
-module.exports = { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, CheckData, F_Delete, SaveEmailBody, SaveMenuInfo, ConfigMenu, DelRes, HelpTextSave, OtherText, DifImgSave };
+const GenerateBitlyUrl = async (url, res_id) => {
+    var res = '',
+        data = '';
+
+    var options = {
+        'method': 'POST',
+        'url': 'https://api-ssl.bitly.com/v4/shorten',
+        'headers': {
+            'Authorization': '9f526219992d43ac22e50e289fb09fd7c9cc25a2',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            "domain": "bit.ly",
+            "long_url": url
+        })
+
+    };
+    // console.log({body: options.body});
+    return new Promise((resolve, reject) => {
+        request(options, function (error, response) {
+            if (error) throw new Error(error);
+            // console.log({ response: response.body });
+            data = JSON.parse(response.body);
+            // console.log({ data_link: data.link });
+            if (data.id) {
+                var link = data.link; //'https://' + data.id;
+                // console.log({ link });
+                var sql = `UPDATE md_url SET bitly_url = "${link}" WHERE restaurant_id = "${res_id}"`;
+                // console.log({ sql });
+                // return new Promise((resolve, reject) => {
+                db.query(sql, (err, lastId) => {
+                    if (err) {
+                        console.log(err);
+                        res = { suc: 0, msg: JSON.stringify(err) }
+                    } else {
+                        res = { suc: 1, msg: link };
+                    }
+                    // console.log({ res });
+                    resolve(res);
+                })
+                // })
+            } else {
+                // return new Promise((resolve, reject) => {
+                res = { suc: 0, msg: 'No URL Generated !!' };
+                resolve(res);
+                // })
+            }
+        });
+    })
+
+}
+
+module.exports = { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, CheckData, F_Delete, SaveEmailBody, SaveMenuInfo, ConfigMenu, DelRes, HelpTextSave, OtherText, DifImgSave, GenerateBitlyUrl };

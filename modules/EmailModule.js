@@ -2,6 +2,7 @@ const db = require('../core/db');
 const dateFormat = require('dateformat');
 const { F_Select } = require('./MenuSetupModule');
 const nodemailer = require('nodemailer');
+const Buffer = require('buffer').Buffer;
 
 var client_url = 'https://shoplocal-lagunabeach.com/#/';
 var api_url = 'https://lagunaapi.shoplocal-lagunabeach.com/';
@@ -14,7 +15,7 @@ const ConfirmMenu = async (res_id) => {
     let con = await F_Select(con_sql);
     let parm_sql = `SELECT * FROM md_parm_value`;
     let param = await F_Select(parm_sql);
-    var img = qr.msg[0].image,
+    var img = qr.msg[0].dynamic_img,
         con_name = con.msg[0].contact_name,
         email = con.msg[0].email,
         pro_name = param.msg[0].param_value,
@@ -93,7 +94,7 @@ const send_email = async (res_id, email_id, img, con_name, pro_name, email_name)
                 + pro_name + '</p>'
                 + '<p style="font-family:Arial, Helvetica, sans-serif; padding-top:20px; padding-bottom:20px; margin:0;">'
                 + '<a href="' + client_url + 'confirmation/' + res_id + '" style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: 600;'
-                + 'padding: 8px 15px; margin: 0; background: #3fb048; text-decoration: none; color: #fff; border-radius: 34px; width: 100%; display: inline-block; text-align: center; box-sizing: border-box;">Approve Menu</a>'
+                + 'padding: 8px 15px; margin: 0; background: #3fb048; text-decoration: none; color: #fff; border-radius: 34px; width: 100%; display: inline-block; text-align: center; box-sizing: border-box;">Request Amendment</a>'
                 + '</p></td>'
                 + '</tr>'
                 + '</table>'
@@ -143,7 +144,7 @@ const ApproveMenu = async (data) => {
 }
 
 const SendAdminUnapproveMail = async (res_id, apr_flag, menu_list, desc) => {
-    console.log({ menu_list });
+    // console.log({ menu_list });
     var v = '',
         v1 = '';
     for (let i = 0; i < menu_list.length; i++) {
@@ -288,6 +289,10 @@ const SendAdminUnapproveMail = async (res_id, apr_flag, menu_list, desc) => {
 
 const OrderEmail = (res_id, email_id, contact_name, en_data) => {
     return new Promise(async (resolve, reject) => {
+        var type = 1;
+        let sql = `SELECT email_type_id, email_body FROM md_config_email WHERE email_type_id = ${type}`;
+        var sql_dt = await F_Select(sql);
+        var email_body = sql_dt.msg[0].email_body;
         // FOR LOCAL
         // var transporter = nodemailer.createTransport({
         //     service: 'gmail',
@@ -339,10 +344,10 @@ const OrderEmail = (res_id, email_id, contact_name, en_data) => {
                 + '<td align="left" valign="top">'
                 + '<h2 style="font-size:18px; font-weight:700; font-family:Arial, Helvetica, sans-serif;">Hi ' + contact_name + ',</h2>'
                 + '<h2 style="font-size:18px; font-weight:700; font-family:Arial, Helvetica, sans-serif;">Congratulations</h2>'
-                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">You have successfully completed your registration..</p>'
-                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">Please click on the link bellow to complete your order.</p>'
-                // + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">To do this please scan the QR Code below which will take you to the Menu. Go through the entire Menu and when you have finished click on the button blow to confirm your approval or reject it if there are any errors.</p>'
-                // + '<p style="padding-bottom:15px; margin:0;"><img src="' + api_url + img + '" width="128" height="128" alt=""></p>'
+                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">' + email_body + '</p>'
+                // + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">You have successfully completed your registration..</p>'
+                // + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">Please click on the link bellow to complete your order.</p>'
+
                 + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:19px; padding-bottom:15px; margin:0;"><strong>Your Sincerely</strong>,<br>'
                 + email_name + '<br>'
                 + pro_name + '</p>'
@@ -371,6 +376,22 @@ const OrderEmail = (res_id, email_id, contact_name, en_data) => {
 }
 
 const PayEmail = async (res_id, en_data) => {
+    var type = 2;
+    let sql = `SELECT email_type_id, email_body FROM md_config_email WHERE email_type_id = ${type}`;
+    var sql_dt = await F_Select(sql);
+    var email_body = sql_dt.msg[0].email_body;
+
+    var str = Buffer.from(en_data, 'base64').toString('ascii');
+    var de_id = str.split('/');
+    var de_res_id = de_id[0],
+        de_res_email = de_id[1];
+
+    var new_date = new Date(),
+        mod_dt = new_date.setHours(new_date.getHours() + 5),
+        new_dt = dateFormat(mod_dt, "yyyy-mm-dd HH:MM:ss"),
+        str = `${de_res_id}/${de_res_email}/${new_dt}`,
+        new_en_data = Buffer.from(str).toString('base64');
+    // console.log({ date_1, str, new_en_data });
     let con_sql = `SELECT * FROM td_contacts WHERE id = "${res_id}"`;
     let con = await F_Select(con_sql);
     let parm_sql = `SELECT * FROM md_parm_value`;
@@ -428,15 +449,15 @@ const PayEmail = async (res_id, en_data) => {
                 + '<td align="left" valign="top">'
                 + '<h2 style="font-size:18px; font-weight:700; font-family:Arial, Helvetica, sans-serif;">Hi ' + contact_name + ',</h2>'
                 + '<h2 style="font-size:18px; font-weight:700; font-family:Arial, Helvetica, sans-serif;">Congratulations</h2>'
-                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">Your order has been placed successfully.</p>'
-                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">Please click on the link bellow to complete your payment.</p>'
-                // + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">To do this please scan the QR Code below which will take you to the Menu. Go through the entire Menu and when you have finished click on the button blow to confirm your approval or reject it if there are any errors.</p>'
-                // + '<p style="padding-bottom:15px; margin:0;"><img src="' + api_url + img + '" width="128" height="128" alt=""></p>'
+                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">' + email_body + '</p>'
+                // + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">Your order has been placed successfully.</p>'
+                // + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">Please click on the link bellow to complete your payment.</p>'
+
                 + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:19px; padding-bottom:15px; margin:0;"><strong>Your Sincerely</strong>,<br>'
                 + email_name + '<br>'
                 + pro_name + '</p>'
                 + '<p style="font-family:Arial, Helvetica, sans-serif; padding-top:20px; padding-bottom:20px; margin:0;">'
-                + '<a href="' + client_url + 'payment/' + en_data + '" style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: 600;'
+                + '<a href="' + client_url + 'payment/' + new_en_data + '" style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: 600;'
                 + 'padding: 8px 15px; margin: 0; background: #3fb048; text-decoration: none; color: #fff; border-radius: 34px; width: 100%; display: inline-block; text-align: center; box-sizing: border-box;">Pay Now</a>'
                 + '</p></td>'
                 + '</tr>'
@@ -460,6 +481,11 @@ const PayEmail = async (res_id, en_data) => {
 }
 
 const UserCredential = async (res_id, password) => {
+    var type = 3;
+    let sql = `SELECT email_type_id, email_body FROM md_config_email WHERE email_type_id = ${type}`;
+    var sql_dt = await F_Select(sql);
+    var email_body = sql_dt.msg[0].email_body;
+
     let con_sql = `SELECT * FROM td_contacts WHERE id = "${res_id}"`;
     let con = await F_Select(con_sql);
     let parm_sql = `SELECT * FROM md_parm_value`;
@@ -517,11 +543,12 @@ const UserCredential = async (res_id, password) => {
                 + '<td align="left" valign="top">'
                 + '<h2 style="font-size:18px; font-weight:700; font-family:Arial, Helvetica, sans-serif;">Hi ' + contact_name + ',</h2>'
                 + '<h2 style="font-size:18px; font-weight:700; font-family:Arial, Helvetica, sans-serif;">Congratulations</h2>'
-                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">We are happy to have you as a part of the Shop Local Laguna family!</p>'
-                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">Your payment has been done successfully.</p>'
+                // + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">We are happy to have you as a part of the Shop Local Laguna family!</p>'
+                // + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">Your payment has been done successfully.</p>'
+                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">' + email_body + '</p>'
                 + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">Your login credentials are as follow</p>'
                 + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;"><b>UserName:</b> ' + email_id + '<br><b>Password:</b> ' + password + '</p>'
-                + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">Please click on the link bellow to login.</p>'
+                // + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:22px; padding-bottom:15px; margin:0;">Please click on the link bellow to login.</p>'
                 + '<p style="font-family:Arial, Helvetica, sans-serif; font-size:13px; font-weight:400; line-height:19px; padding-bottom:15px; margin:0;"><strong>Your Sincerely</strong>,<br>'
                 + email_name + '<br>'
                 + pro_name + '</p>'

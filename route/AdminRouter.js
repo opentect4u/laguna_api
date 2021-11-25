@@ -1,7 +1,7 @@
 const express = require('express');
 const AdmZip = require('adm-zip');
 const fs = require('fs');
-const { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, F_Delete, SaveEmailBody, SaveMenuInfo, ConfigMenu, DelRes, HelpTextSave, OtherText } = require('../modules/AdminModule');
+const { PackageSave, GetPackageData, PromoSave, GetResult, HolderClingSave, UpdateApproval, F_Delete, SaveEmailBody, SaveMenuInfo, ConfigMenu, DelRes, HelpTextSave, OtherText, GenerateBitlyUrl } = require('../modules/AdminModule');
 const { F_Select } = require('../modules/MenuSetupModule');
 const AdmRouter = express.Router();
 
@@ -218,6 +218,13 @@ AdmRouter.post('/other_text', async (req, res) => {
     var data = req.body;
     var dt = await OtherText(data);
     res.send(dt);
+})
+
+AdmRouter.post('/create_bitly_url', async (req, res) => {
+    var url = req.body.url,
+        res_id = req.body.res_id;
+    var data = await GenerateBitlyUrl(url, res_id);
+    res.send(data);
 })
 
 module.exports = { AdmRouter };

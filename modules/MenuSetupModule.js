@@ -460,11 +460,11 @@ const ItemPriceSave = (data) => {
     var sql = '';
     if (data.id > 0) {
         sql = `UPDATE md_item_description SET menu_id = "${data.menu_id}", section_id = "${data.sec_id}", item_id = "${data.item_id}", item_price = "${data.item_price}", 
-        item_desc = "${data.item_desc}", item_note = "${data.item_note}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
+        item_desc = "${data.item_desc}", item_note = "${data.item_note}", note_color = "${data.note_color}", modified_by = "${data.restaurant_id}", modified_dt = "${datetime}"
         WHERE id = "${data.id}"`;
     } else {
-        sql = `INSERT INTO md_item_description (restaurant_id, menu_id, section_id, item_id, item_price, item_desc, item_note, created_by, created_dt)
-    VALUES ("${data.restaurant_id}", "${data.menu_id}", "${data.sec_id}", "${data.item_id}", "${data.item_price}", "${data.item_desc}", "${data.item_note}", "${data.restaurant_id}", "${datetime}")`;
+        sql = `INSERT INTO md_item_description (restaurant_id, menu_id, section_id, item_id, item_price, item_desc, note_color, item_note, created_by, created_dt)
+    VALUES ("${data.restaurant_id}", "${data.menu_id}", "${data.sec_id}", "${data.item_id}", "${data.item_price}", "${data.item_desc}", "${data.item_note}", "${data.note_color}", "${data.restaurant_id}", "${datetime}")`;
     }
 
     return new Promise((resolve, reject) => {

@@ -153,6 +153,7 @@ const PaySave = async (data) => {
     var pwd = bcrypt.hashSync(sum, 10);
     var dt = '';
     await SaveUrl(de_id[0], data);
+    await UpdateContact(de_id[0]);
     await UserCredential(de_id[0], sum);
     return new Promise(async (resolve, reject) => {
         if (await UpdateOrder(data)) {
@@ -219,6 +220,21 @@ const SaveUrl = (id, data) => {
                 })
             })
         }
+    })
+}
+
+const UpdateContact = async (res_id) => {
+    let sql = `UPDATE td_contacts SET active_user = 'Y' WHERE id = ${res_id}`;
+    return new Promise((resolve, reject) => {
+        db.query(sql, (err, lastId) => {
+            if (err) {
+                console.log(err);
+                data = { suc: 0, msg: JSON.stringify(err) };
+            } else {
+                data = { suc: 1, msg: 'Inserted Successfully !!' };
+            }
+            resolve(data)
+        })
     })
 }
 

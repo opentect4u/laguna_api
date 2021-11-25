@@ -1,6 +1,6 @@
 const express = require('express');
 const dateFormat = require('dateformat');
-const { PreviewMenu, CheckMenu, MenuData } = require('../modules/MenuModule');
+const { PreviewMenu, CheckMenu, MenuData, AllMenu } = require('../modules/MenuModule');
 const { F_Select } = require('../modules/MenuSetupModule');
 const MenuRouter = express.Router();
 
@@ -67,11 +67,11 @@ MenuRouter.get('/menu_data', async (req, res) => {
     let curr_time = dateFormat(loc_time, "HH:MM:ss");
 
     // CHECK SPECIAL MENU OPERATION //
-    var dt = await (CheckSpecialMenu(res_id, menu_date));
+    var dt = await (CheckSpecialMenu(res_id, menu_date, now_date));
     if (dt.res) {
         // FOR EXCLUSIVE SPECIAL MENU //
         if (dt.special_dt.day_flag == 'E') {
-            sql = `SELECT id, restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, month_day, menu_date, group_concat(DISTINCT regular_menu_id separator ',') as regular_menu_id, start_time, end_time 
+            sql = `SELECT id, restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, month_day, menu_frm_dt, menu_to_dt, group_concat(DISTINCT regular_menu_id separator ',') as regular_menu_id, start_time, end_time 
             FROM td_special_date_time WHERE restaurant_id = ${res_id} AND month_day = ${menu_date}`;
             sql_dt = await F_Select(sql);
             if (sql_dt.msg.length > 0) {
@@ -96,9 +96,9 @@ MenuRouter.get('/menu_data', async (req, res) => {
             }
         } else {
             // FOR IN ADDITION SPECIAL MENU //
-            sql = `SELECT id, restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, month_day, menu_date, group_concat(DISTINCT regular_menu_id separator ',') as regular_menu_id, start_time, end_time
-            FROM td_special_date_time WHERE restaurant_id = ${res_id} AND menu_date = "${now_date}"`;
-            // console.log({ex_sql: sql});
+            sql = `SELECT id, restaurant_id, menu_id, active_flag, regular_menu_flag, day_flag, month_day, menu_frm_dt, menu_to_dt, group_concat(DISTINCT regular_menu_id separator ',') as regular_menu_id, start_time, end_time
+            FROM td_special_date_time WHERE restaurant_id = ${res_id} AND menu_frm_dt <= "${now_date}" AND menu_to_dt >= "${now_date}"`;
+            // console.log({ ex_sql: sql });
             sql_dt = await F_Select(sql);
             if (sql_dt.msg.length > 0) {
                 st_en_sql = `SELECT MIN(start_time) start_time, MAX(end_time) end_time FROM td_date_time WHERE restaurant_id = ${res_id} AND menu_id IN (${dt.special_dt.regular_menu_id})`;
@@ -147,11 +147,19 @@ MenuRouter.get('/menu_data', async (req, res) => {
 })
 
 // CHECKING SPECIAL MENU IS ACTIVE OR NOT //
-const CheckSpecialMenu = async (res_id, date) => {
+const CheckSpecialMenu = async (res_id, date, now_date) => {
     var special_dt = '',
-        dt = '';
+        dt = '',
+        whr = '';
+    var chk_sql = `SELECT id, day_flag FROM td_special_date_time WHERE restaurant_id = ${res_id}`;
+    var chk_dt = await F_Select(chk_sql);
+    if (chk_dt.msg.length > 0) {
+        var day_flag = chk_dt.msg[0].day_flag;
+        whr = day_flag != 'E' ? `AND menu_frm_dt <= "${now_date}" AND menu_to_dt >= "${now_date}"` : `AND month_day = ${date}`;
+    }
     var cunt_sql = `SELECT id, menu_id, active_flag, regular_menu_flag, day_flag, group_concat(DISTINCT regular_menu_id separator ',') as regular_menu_id
-    FROM td_special_date_time WHERE restaurant_id = ${res_id} AND month_day = ${date}`;
+    FROM td_special_date_time WHERE restaurant_id = ${res_id} ${whr}`;
+    console.log({ cunt_sql });
     var cunt_dt = await F_Select(cunt_sql);
     return new Promise((resolve, reject) => {
         if (cunt_dt.msg.length > 0) {
@@ -229,5 +237,10 @@ const CheckMoreMenu = async (res_id, date, curr_time) => {
     // if(chk_dt.msg)
 }
 
+MenuRouter.get('/get_all_menu', async (req, res) => {
+    var res_id = req.query.id;
+    var data = await AllMenu(res_id);
+    res.send(data);
+})
 
 module.exports = { MenuRouter }
